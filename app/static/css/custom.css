@@ -2,3 +2,10 @@
 body {
     /* Custom styles can be added here */
 }
+
+@font-face {
+    font-family: 'OpenDyslexic';
+    src: url('/static/webfonts/opendyslexic3-regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
