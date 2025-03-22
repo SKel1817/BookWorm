@@ -145,8 +145,12 @@
 
             var content = doc.body.innerHTML;
 
-            // Replace every period with a period followed by a space
-            content = content.replace(/\.\./g, '. <br><br><br>');
+            var counter = 0;
+            content = content.replace(/\./g, function(match) {
+            counter++;
+            // Replace only on every other occurrence
+            return (counter % 2 === 0) ? '. <br><br><br>' : match;
+            });
 
             // Update the iframe content
             doc.body.innerHTML = content;
