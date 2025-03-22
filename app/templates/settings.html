@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}Settings - BookWorm{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto bg-white dark:bg-[#222222] rounded-lg shadow-lg p-6 mb-12">
+    <h1 class="text-2xl font-bold text-primary-800 dark:text-primary-200 mb-4">Settings</h1>
+    <p class="text-lg text-primary-700 dark:text-primary-300 mb-6">Thank you for using BookWorm! Made with ❤️</p>
+    
+    {% if not secret_key_verified %}
+    <form action="/settings" method="post">
+        <div class="mb-4">
+            <label for="secret-key" class="block text-sm font-medium text-primary-700 dark:text-primary-300">Secret Key</label>
+            <input 
+                type="password" 
+                id="secret-key" 
+                name="secret_key" 
+                required 
+                class="mt-1 block w-full px-3 py-2 border border-primary-300 dark:border-primary-700 rounded-md shadow-sm focus:outline-none focus:ring-accent-500 focus:border-accent-500 sm:text-sm">
+        </div>
+        <div class="mt-6">
+            <button 
+                type="submit" 
+                class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-accent-600 hover:bg-accent-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-500">
+                Verify Secret Key
+            </button>
+        </div>
+    </form>
+    {% else %}
+    <form action="/settings" method="post">
+        <input type="hidden" name="secret_key" value="{{ secret_key }}">
+        <div class="mb-4">
+            <h2 class="text-xl font-semibold text-primary-800 dark:text-primary-200 mb-2">Google Gemini Configuration</h2>
+            <label for="google-gemini-key" class="block text-sm font-medium text-primary-700 dark:text-primary-300">Google Gemini API Key</label>
+            <input 
+                type="text" 
+                id="google-gemini-key" 
+                name="google_gemini_key" 
+                value="{{ google_gemini_key }}" 
+                class="mt-1 block w-full px-3 py-2 border border-primary-300 dark:border-primary-700 rounded-md shadow-sm focus:outline-none focus:ring-accent-500 focus:border-accent-500 sm:text-sm">
+        </div>
+        
+        <div class="mb-4">
+            <h2 class="text-xl font-semibold text-primary-800 dark:text-primary-200 mb-2">Flask Configuration</h2>
+            <label for="flask-port" class="block text-sm font-medium text-primary-700 dark:text-primary-300">Flask Port</label>
+            <input 
+                type="number" 
+                id="flask-port" 
+                name="flask_port" 
+                value="{{ flask_port }}" 
+                class="mt-1 block w-full px-3 py-2 border border-primary-300 dark:border-primary-700 rounded-md shadow-sm focus:outline-none focus:ring-accent-500 focus:border-accent-500 sm:text-sm">
+        </div>
+        
+        <div class="mt-6">
+            <button 
+                type="submit" 
+                class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-accent-600 hover:bg-accent-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent-500">
+                Save Settings
+            </button>
+        </div>
+    </form>
+    {% endif %}
+</div>
+
+<!-- Toast Notification -->
+<div id="toast" class="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-md shadow-md hidden">
+    <p id="toast-message"></p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toast-message');
+        
+        {% if get_flashed_messages() %}
+        {% for message in get_flashed_messages(with_categories=true) %}
+        toastMessage.textContent = "{{ message[1] }}";
+        toast.classList.remove('hidden');
+        toast.classList.add('bg-{{ 'green' if message[0] == 'success' else 'red' }}-500');
+        setTimeout(() => {
+            toast.classList.add('hidden');
+        }, 3000);
+        {% endfor %}
+        {% endif %}
+    });
+</script>
+{% endblock %}

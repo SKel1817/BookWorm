@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BookWorm{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    
+    <!-- Shadcn styles (mimicking Shadcn look with Tailwind) -->
+    <script src="{{ url_for('static', filename='js/tailwind.js') }}"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            '50': '#f6f5f1',
+                            '100': '#e6e2d7',
+                            '200': '#d5cdba',
+                            '300': '#c0b49a',
+                            '400': '#ab9a7b',
+                            '500': '#9a8c6e',
+                            '600': '#8a7c5f',
+                            '700': '#73674f',
+                            '800': '#5f5542',
+                            '900': '#4f4838',
+                        },
+                        accent: {
+                            '50': '#f2f7f2',
+                            '100': '#dfeade',
+                            '200': '#c0d6bf',
+                            '300': '#9cbc9b',
+                            '400': '#779b76',
+                            '500': '#5c8059',
+                            '600': '#4a6847',
+                            '700': '#3d563a',
+                            '800': '#344630',
+                            '900': '#2c3a29',
+                        },
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome.css') }}">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    
+    {% block head %}{% endblock %}
+</head>
+<body class="min-h-screen bg-[#f8f5f0] dark:bg-[#1e1e1e] text-[#2d2d2d] dark:text-[#f0f0f0] transition-colors duration-300">
+    <div class="flex flex-col min-h-screen">
+        <!-- Navigation Bar -->
+        <nav class="p-4 bg-[#f0ece5] dark:bg-[#292929] shadow-md">
+            <div class="container mx-auto flex items-center justify-between">
+                <!-- Left side - Logo and article info -->
+                <div class="flex items-center space-x-4">
+                    <a href="/" class="flex items-center text-xl font-bold text-primary-700 dark:text-primary-300">
+                        <i class="fas fa-book-reader mr-2"></i>
+                        <span>BookWorm</span>
+                    </a>
+                    
+                    <!-- Title and original source - only shown on reader page -->
+                    {% if request.endpoint == 'main.reader' %}
+                    <div class="hidden md:block">
+                        <h1 class="text-lg font-bold text-primary-800 dark:text-primary-200 truncate max-w-xs">{{ title }}</h1>
+                        <p class="text-xs text-primary-500 dark:text-primary-400">
+                            <a href="{{ url }}" target="_blank" class="hover:underline">
+                                <i class="fas fa-external-link-alt mr-1"></i>Original source
+                            </a>
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Center - Editing tools (only visible on reader page) -->
+                {% if request.endpoint == 'main.reader' %}
+                <div class="hidden md:flex items-center space-x-2">
+                    <button id="font-decrease" class="p-2 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition" title="Decrease font size">
+                        <i class="fas fa-font text-sm text-primary-600 dark:text-primary-300"></i>
+                    </button>
+                    <button id="font-increase" class="p-2 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition" title="Increase font size">
+                        <i class="fas fa-font text-lg text-primary-600 dark:text-primary-300"></i>
+                    </button>
+                    <select id="font-family" class="bg-white dark:bg-[#333333] border border-primary-300 dark:border-primary-700 rounded px-2 py-1 text-sm">
+                        <option value="sans">Sans-serif</option>
+                        <option value="serif">Serif</option>
+                        <option value="mono">Monospace</option>
+                    </select>
+                    <button id="read-aloud" class="p-2 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition" title="Read aloud">
+                        <i class="fas fa-volume-up text-primary-600 dark:text-primary-300"></i>
+                    </button>
+                    <button id="spacing-decrease" class="p-2 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition" title="Decrease spacing">
+                        <i class="fas fa-compress-arrows-alt text-primary-600 dark:text-primary-300"></i>
+                    </button>
+                    <button id="spacing-increase" class="p-2 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition" title="Increase spacing">
+                        <i class="fas fa-expand-arrows-alt text-primary-600 dark:text-primary-300"></i>
+                    </button>
+                    <button id="annotation-mode" class="p-2 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition" title="Annotation mode">
+                        <i class="fas fa-highlighter text-primary-600 dark:text-primary-300"></i>
+                    </button>
+                    <button id="toggle-focus" class="p-2 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition" title="Focus mode">
+                        <i class="fas fa-leaf text-accent-600 dark:text-accent-400"></i>
+                    </button>
+                </div>
+                {% endif %}
+                
+                <!-- Right nav items -->
+                <div class="flex items-center space-x-4">
+                    <a href="https://github.com/SKel1817/BookWorm" target="_blank" class="text-primary-700 dark:text-primary-300 hover:text-primary-900 dark:hover:text-primary-100 transition">
+                        <i class="fab fa-github text-xl"></i>
+                    </a>
+                    
+                    <button id="theme-toggle" class="text-primary-700 dark:text-primary-300 hover:text-primary-900 dark:hover:text-primary-100 transition">
+                        <i class="fas fa-sun text-xl dark:hidden"></i>
+                        <i class="fas fa-moon text-xl hidden dark:block"></i>
+                    </button>
+                    
+                    <a href="/settings" class="text-primary-700 dark:text-primary-300 hover:text-primary-900 dark:hover:text-primary-100 transition">
+                        <i class="fas fa-cog text-xl"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Mobile editing tools - only visible on reader page -->
+            {% if request.endpoint == 'main.reader' %}
+            <div class="md:hidden flex flex-wrap justify-center items-center gap-2 mt-2 pb-1 border-t border-primary-200 dark:border-primary-700 pt-2">
+                <button id="mobile-font-decrease" class="p-1 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition">
+                    <i class="fas fa-font text-sm text-primary-600 dark:text-primary-300"></i>
+                </button>
+                <button id="mobile-font-increase" class="p-1 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition">
+                    <i class="fas fa-font text-lg text-primary-600 dark:text-primary-300"></i>
+                </button>
+                <select id="mobile-font-family" class="bg-white dark:bg-[#333333] border border-primary-300 dark:border-primary-700 rounded px-1 py-1 text-xs">
+                    <option value="sans">Sans</option>
+                    <option value="serif">Serif</option>
+                    <option value="mono">Mono</option>
+                </select>
+                <button id="mobile-read-aloud" class="p-1 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition">
+                    <i class="fas fa-volume-up text-primary-600 dark:text-primary-300"></i>
+                </button>
+                <button id="mobile-toggle-focus" class="p-1 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition">
+                    <i class="fas fa-leaf text-accent-600 dark:text-accent-400"></i>
+                </button>
+            </div>
+
+            <!-- Mobile article title -->
+            <div class="md:hidden text-center mt-1 border-t border-primary-200 dark:border-primary-700 pt-2">
+                <h1 class="text-sm font-bold text-primary-800 dark:text-primary-200 truncate">{{ title }}</h1>
+                <p class="text-xs text-primary-500 dark:text-primary-400">
+                    <a href="{{ url }}" target="_blank" class="hover:underline">
+                        <i class="fas fa-external-link-alt mr-1"></i>Original source
+                    </a>
+                </p>
+            </div>
+            {% endif %}
+        </nav>
+        
+        <!-- Main Content -->
+        <main class="flex-grow container mx-auto p-4">
+            {% block content %}
+            {% endblock %}
+        </main>
+        
+        <!-- Footer -->
+        <footer class="bg-[#f0ece5] dark:bg-[#292929] text-center p-4 text-sm text-primary-700 dark:text-primary-300">
+            <p>&copy; 2025 BookWorm - Simplifying online reading</p>
+        </footer>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/local.js') }}"></script>
+    {% if request.endpoint == 'main.reader' %}
+    <script>
+        // Connect mobile buttons to their desktop counterparts
+        document.addEventListener('DOMContentLoaded', function() {
+            // Font size controls
+            document.getElementById('mobile-font-decrease').addEventListener('click', function() {
+                document.getElementById('font-decrease').click();
+            });
+            document.getElementById('mobile-font-increase').addEventListener('click', function() {
+                document.getElementById('font-increase').click();
+            });
+            document.getElementById('mobile-font-family').addEventListener('change', function() {
+                const desktopSelect = document.getElementById('font-family');
+                desktopSelect.value = this.value;
+                desktopSelect.dispatchEvent(new Event('change'));
+            });
+            document.getElementById('mobile-read-aloud').addEventListener('click', function() {
+                document.getElementById('read-aloud').click();
+            });
+            document.getElementById('mobile-toggle-focus').addEventListener('click', function() {
+                document.getElementById('toggle-focus').click();
+            });
+        });
+    </script>
+    {% endif %}
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>
