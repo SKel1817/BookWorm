@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Duck Article Editor</title>
+    <style>
+        /* General styling for the page */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        /* Styling for the settings panel */
+        #settingsPanel {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #eee;
+        }
+
+        /* Styling for labels */
+        label {
+            display: block;
+            margin: 8px 0 4px;
+        }
+
+        /* Styling for input fields and textareas */
+        input, textarea {
+            width: 100%;
+            padding: 6px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        /* Styling for buttons */
+        button {
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+
+        /* Styling for the iframe displaying the article */
+        #articleFrame {
+            width: 100%;
+            height: 500px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <!-- Settings panel for customizing the article -->
+    <div id="settingsPanel">
+        <h2>Settings Panel</h2>
+
+        <!-- Dropdown to select font -->
+        <label for="Text font">Pick a font from the dropdown</label>
+        <select id="font" name="font">
+            <option value="Arial">Arial</option>
+            <option value="Times New Roman">Times New Roman</option>
+            <option value="Courier New">Courier New</option>
+            <option value="Verdana">Verdana</option>
+            <option value="Comic Sans MS">Comic Sans MS</option>
+        </select>
+
+        <!-- Dropdown to select font size -->
+        <label for="Text size">Pick a size from the dropdown</label>
+        <select id="size" name="size">
+            <!-- Options for font sizes -->
+            <option value="8">8</option>
+            <option value="10">10</option>
+            <option value="12">12</option>
+            <option value="14">14</option>
+            <option value="16">16</option>
+            <option value="18">18</option>
+            <option value="20">20</option>
+            <option value="22">22</option>
+            <option value="24">24</option>
+            <option value="26">26</option>
+            <option value="28">28</option>
+            <option value="30">30</option>
+            <option value="32">32</option>
+            <option value="34">34</option>
+            <option value="36">36</option>
+            <option value="38">38</option>
+            <option value="40">40</option>
+            <option value="42">42</option>
+            <option value="44">44</option>
+            <option value="46">46</option>
+            <option value="48">48</option>
+            <option value="50">50</option>
+            <option value="52">52</option>
+            <option value="54">54</option>
+            <option value="56">56</option>
+            <option value="58">58</option>
+            <option value="60">60</option>
+            <option value="62">62</option>
+            <option value="64">64</option>
+            <option value="66">66</option>
+            <option value="68">68</option>
+            <option value="70">70</option>
+            <option value="72">72</option>
+        </select>
+
+        <!-- Dropdown to select text color -->
+        <label for="Text color">Pick a color from the dropdown</label>
+        <select id="color" name="color">
+            <!-- Options for text colors -->
+            <option value="#000000">Black</option>
+            <option value="#0000FF">Blue</option>
+            <option value="#FF0000">Red</option>
+            <option value="#008000">Green</option>
+            <option value="#FFFF00">Yellow</option>
+            <option value="#800080">Purple</option>
+            <option value="#FFA500">Orange</option>
+            <option value="#FFC0CB">Pink</option>
+            <option value="#A52A2A">Brown</option>
+            <option value="#808080">Grey</option>
+            <option value="#FFFFFF">White</option>
+            <option value="#00FFFF">Cyan</option>
+            <option value="#FF00FF">Magenta</option>
+            <option value="#00FF00">Lime</option>
+            <option value="#808000">Olive</option>
+            <option value="#800000">Maroon</option>
+            <option value="#000080">Navy</option>
+            <option value="#008080">Teal</option>
+        </select>
+
+        <!-- Radio buttons to select dark or light mode -->
+        <label for="darkMode">Dark mode or light mode</label>
+        <input type="radio" id="darkMode" name="mode" value="dark">
+        <label for="darkMode">Dark</label>
+        <input type="radio" id="lightMode" name="mode" value="light">
+        <label for="lightMode">Light</label>
+
+        <!-- Button to apply the selected settings -->
+        <button id="updateButton">Update Article</button>
+    </div>
+
+    <!-- Iframe to display the article -->
+    <iframe id="articleFrame" src="test.html" title="Duck Article"></iframe>
+    <script>
+        function formatArticle() {
+            var iframe = document.getElementById('articleFrame');
+            var doc = iframe.contentDocument || iframe.contentWindow.document;
+
+            var content = doc.body.innerHTML;
+
+            // Replace every period with a period followed by a space
+            content = content.replace(/\.\./g, '. <br><br><br>');
+
+            // Update the iframe content
+            doc.body.innerHTML = content;
+        }
+
+        // Wait for the iframe to load and then call formatArticle
+        document.getElementById('articleFrame').addEventListener('load', formatArticle);
+    </script>
+<script>
+    document.getElementById('updateButton').addEventListener('click', function() {
+        // Get selected font, size, color, and mode
+        var font = document.getElementById('font').value;
+        var size = document.getElementById('size').value;
+        var color = document.getElementById('color').value;
+        var mode = document.querySelector('input[name="mode"]:checked').value;
+    
+        // Update the parent document (the whole website)
+        if (mode === "dark") {
+            document.body.style.backgroundColor = "#000000";
+            document.body.style.color = "#ffffff";
+            // Update specific elements like settings panel
+            document.getElementById('settingsPanel').style.backgroundColor = "#000000";
+            document.getElementById('settingsPanel').style.color = "#ffffff";
+        } else {
+            document.body.style.backgroundColor = "#ffffff";
+            document.body.style.color = "#000000";
+            document.getElementById('settingsPanel').style.backgroundColor = "#eee"; // original color
+            document.getElementById('settingsPanel').style.color = "#000000";
+        }
+    
+        // Access the iframe's document
+        var iframe = document.getElementById('articleFrame');
+        var doc = iframe.contentDocument || iframe.contentWindow.document;
+    
+        // Apply font and size to the iframe content
+        doc.body.style.fontFamily = font;
+        doc.body.style.fontSize = size + "px";
+    
+        // Update iframe's dark or light mode
+        if (mode === "dark") {
+            doc.body.style.backgroundColor = "#000000";
+            var textColor = (color === "#000000") ? "#ffffff" : color;
+            doc.body.style.color = textColor;
+            doc.querySelectorAll('*').forEach(function(element) {
+                element.style.backgroundColor = "#000000";
+                element.style.color = textColor;
+            });
+        } else {
+            doc.body.style.backgroundColor = "#ffffff";
+            doc.body.style.color = color || "#000000";
+            doc.querySelectorAll('*').forEach(function(element) {
+                element.style.backgroundColor = "#ffffff";
+                element.style.color = color || "#000000";
+            });
+        }
+    });
+    </script>
+    
+    
+</body>
+</html>
