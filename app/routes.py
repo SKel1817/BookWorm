@@ -237,3 +237,8 @@ def api_chat_status():
         'available': gemini_ai.is_available(),
         'model': gemini_ai.model
     })
+
+@main_bp.route('/healthcheck', methods=['GET'])
+def healthcheck():
+    """Health check endpoint for the application"""
+    return jsonify({'status': 'ok'}), 200
