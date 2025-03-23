@@ -1029,6 +1029,56 @@ function getAnnotations() {
         document.getElementById('color-blind').addEventListener('change', function () {
             containerColorBlind.classList.add('hidden');
         });
+        const geminiGenerate = document.getElementById('gemini-generate');
+const loadingScreen = document.getElementById('loading-screen');
+
+geminiGenerate.addEventListener('click', function () {
+    loadingScreen.style.display = 'flex';
+    // Get all images from the reader content
+    const images = document.querySelectorAll('#reader-content img');
+
+    images.forEach(img => {
+        // Avoid processing if a description already exists
+        if (img.nextElementSibling && img.nextElementSibling.classList.contains('image-description')) {
+            return;
+        }
+        const imageUrl = img.getAttribute('src');
+
+        fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: `You are an image captioning agent. For the image at URL: ${imageUrl}, please respond with an imageDescription(text) function call that includes a detailed description of the image. ONLY respond with the function call and nothing else.`
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            if (data.success) {
+                // Expecting a response like: imageDescription("A detailed description here")
+                const match = data.response.match(/imageDescription\((.*?)\)/);
+                if (match) {
+                    const description = match[1].replace(/['"]/g, '');
+                    const caption = document.createElement('div');
+                    caption.className = 'image-description text-sm text-gray-600 dark:text-gray-300 mt-1';
+                    caption.innerText = description;
+                    img.parentNode.insertBefore(caption, img.nextSibling);
+                }
+            } else {
+                showToast('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            showToast('Error: ' + error.message);
+        })
+        .finally(() => {
+            loadingScreen.style.display = 'none';
+        });
+    });
+});
+
     });
 </script>
 {% endblock %}
