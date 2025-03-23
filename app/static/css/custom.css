@@ -9,3 +9,15 @@ body {
     font-weight: normal;
     font-style: normal;
   }
+
+#saved-articles {
+    display: flex;
+    overflow-x: auto;
+    max-width: 100%;
+    gap: 1rem;
+}
+
+#saved-articles .saved-article {
+    flex: 0 0 auto;
+    width: calc(50% - 0.5rem); /* Adjust width to show 2 cards */
+}

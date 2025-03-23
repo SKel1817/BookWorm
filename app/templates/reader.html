@@ -444,6 +444,57 @@ document.addEventListener('DOMContentLoaded', function() {
             if (evilModeActive) {
             speechUtterance.pitch = 0.1; // Lower the pitch for evil mode
             speechUtterance.rate = 1.2; // Increase the rate for evil mode
+
+    function setActiveTool(tool) {
+        activeTool = tool;
+        highlightToggle.classList.toggle('bg-primary-200', tool === 'highlight');
+        eraserToggle.classList.toggle('bg-primary-200', tool === 'eraser');
+        document.body.style.cursor = tool === 'highlight' || tool === 'eraser' ? 'text' : 'default';
+    }
+
+    window.highlightText = function(text) {
+        const content = readerContent.innerHTML;
+        const highlightedContent = content.replace(new RegExp(text, 'gi'), match => `<span class="bg-yellow-300">${match}</span>`);
+        readerContent.innerHTML = highlightedContent;
+    }
+
+    window.removeHighlight = function(text) {
+        const content = readerContent.innerHTML;
+        const unhighlightedContent = content.replace(/<span class="bg-yellow-300">(.*?)<\/span>/gi, (match, p1) => {
+            return p1.includes(text) ? p1 : match;
+        });
+        readerContent.innerHTML = unhighlightedContent;
+    }
+
+    const magicHighlight = document.getElementById('magic-highlight');
+    const loadingScreen = document.getElementById('loading-screen');
+
+    magicHighlight.addEventListener('click', function() {
+        loadingScreen.style.display = 'flex';
+        const content = document.getElementById('reader-content').innerText;
+
+        fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: `You are a text summarization agent, which has the capability to highlight important aspects or key points of an article below. For all of the text in the article, please respond with a highlight(text) function, stating the exact text that you want highlighted. Separate these functions by semicolons, and ONLY respond with the function calls and nothing else. Feel free to highlight more often, as this will help the user. Make the text to highlight EXACTLY what is listed in the article, otherwise the system will not highlight for you. Here is the article: ${content}`
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            if (data.success) {
+            const highlights = data.response.match(/highlight\((.*?)\);/g);
+            if (highlights) {
+                highlights.forEach(call => {
+                const textToHighlight = call.match(/highlight\((.*?)\);/)[1];
+                highlightText(textToHighlight.replace(/['"]/g, ''));
+                });
+            }
+            } else {
+            showToast('Error: ' + data.error);
             }
             speechUtterance.onend = () => {
             isReading = false;
@@ -456,10 +507,12 @@ document.addEventListener('DOMContentLoaded', function() {
             speechSynthesis.cancel();
         }
     });
+
     fontDecrease.addEventListener('click', () => {
         if (currentFontSize > 12) {
             currentFontSize -= 1;
             readerContent.style.fontSize = currentFontSize + 'px';
+            savePreferences();
         }
         if (evilModeActive === true) {
             readerContent.style.fontSize = '1px';
@@ -469,6 +522,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (currentFontSize < 24) {
             currentFontSize += 1;
             readerContent.style.fontSize = currentFontSize + 'px';
+            savePreferences();
         }
         if (evilModeActive === true) {
             readerContent.style.fontSize = '300px';
@@ -498,17 +552,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 readerContent.style.fontFamily = 'OpenDyslexic, ui-sans-serif, system-ui, sans-serif';
                 break;
         }
+        savePreferences();
     });
     spacingDecrease.addEventListener('click', () => {
         if (currentLineHeight > 1.2) {
             currentLineHeight -= 0.1;
             readerContent.style.lineHeight = currentLineHeight;
+            savePreferences();
         }
     });
     spacingIncrease.addEventListener('click', () => {
         if (currentLineHeight < 2.5) {
             currentLineHeight += 0.1;
             readerContent.style.lineHeight = currentLineHeight;
+            savePreferences();
         }
     });
     fontColorDropdown.addEventListener('change', function() {
@@ -533,6 +590,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 readerContent.style.color = '';
                 break;
         }
+        savePreferences();
     });
 
     // Annotation mode and highlight/eraser tools
@@ -563,6 +621,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const content = readerContent.innerHTML;
         const highlightedContent = content.replace(new RegExp(text, 'gi'), match => `<span class="bg-yellow-300">${match}</span>`);
         readerContent.innerHTML = highlightedContent;
+        savePreferences();
     }
     window.removeHighlight = function(text) {
         const content = readerContent.innerHTML;
@@ -570,78 +629,131 @@ document.addEventListener('DOMContentLoaded', function() {
             return p1.includes(text) ? p1 : match;
         });
         readerContent.innerHTML = unhighlightedContent;
+        savePreferences();
     };
+    }
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const readerContent = document.getElementById('reader-content');
+    const fontDecrease = document.getElementById('font-decrease');
+    const fontIncrease = document.getElementById('font-increase');
+    const fontFamily = document.getElementById('font-family');
+    const fontColorDropdown = document.getElementById('font-color');
+    const spacingDecrease = document.getElementById('spacing-decrease');
+    const spacingIncrease = document.getElementById('spacing-increase');
+    const highlightToggle = document.getElementById('highlight-toggle');
+    const eraserToggle = document.getElementById('eraser-toggle');
+    const annotationToggle = document.getElementById('annotation-toggle');
+    let activeTool = null;
+    const url = '{{ url }}';
 
-    // ------------------------------
-    // LOAD SAVED PREFERENCES FROM LOCAL STORAGE
-    // ------------------------------
-    const savedPreferences = JSON.parse(localStorage.getItem('readerPreferences')) || {};
-    if (savedPreferences.fontSize) {
-        readerContent.style.fontSize = savedPreferences.fontSize;
+    function getAnnotations() {
+        const annotations = [];
+        document.querySelectorAll('.annotation').forEach(annotation => {
+            annotations.push({
+                text: annotation.dataset.text,
+                note: annotation.querySelector('.annotation-note').value
+            });
+        });
+        return annotations;
     }
-    if (savedPreferences.fontFamily) {
-        readerContent.style.fontFamily = savedPreferences.fontFamily;
-        fontFamily.value = savedPreferences.fontFamily;
-    }
-    if (savedPreferences.fontColor) {
-        readerContent.style.color = savedPreferences.fontColor;
-        fontColorDropdown.value = savedPreferences.fontColor;
-    }
-    if (savedPreferences.lineHeight) {
-        readerContent.style.lineHeight = savedPreferences.lineHeight;
-    }
-    if (savedPreferences.highlights) {
-        readerContent.innerHTML = savedPreferences.highlights;
-    }
-    function savePreferences() {
-        const preferences = {
-            fontSize: readerContent.style.fontSize,
-            fontFamily: readerContent.style.fontFamily,
-            fontColor: readerContent.style.color,
-            lineHeight: readerContent.style.lineHeight,
-            highlights: readerContent.innerHTML
-        };
-        localStorage.setItem('readerPreferences', JSON.stringify(preferences));
-    }
-    fontDecrease.addEventListener('click', () => {
-        if (parseInt(readerContent.style.fontSize) > 12) {
-            readerContent.style.fontSize = (parseInt(readerContent.style.fontSize) - 1) + 'px';
-            savePreferences();
-        }
-    });
-    fontIncrease.addEventListener('click', () => {
-        if (parseInt(readerContent.style.fontSize) < 24) {
-            readerContent.style.fontSize = (parseInt(readerContent.style.fontSize) + 1) + 'px';
-            savePreferences();
-        }
-    });
-    fontFamily.addEventListener('change', () => {
-        readerContent.style.fontFamily = fontFamily.value;
-        savePreferences();
-    });
-    fontColorDropdown.addEventListener('change', () => {
-        readerContent.style.color = fontColorDropdown.value;
-        savePreferences();
-    });
-    spacingDecrease.addEventListener('click', () => {
-        if (parseFloat(readerContent.style.lineHeight) > 1.2) {
-            readerContent.style.lineHeight = (parseFloat(readerContent.style.lineHeight) - 0.1).toString();
-            savePreferences();
-        }
-    });
-    spacingIncrease.addEventListener('click', () => {
-        if (parseFloat(readerContent.style.lineHeight) < 2.5) {
-            readerContent.style.lineHeight = (parseFloat(readerContent.style.lineHeight) + 0.1).toString();
-            savePreferences();
-        }
-    });
-
+  
     // ------------------------------
     // START FOCUS MODE IF ACTIVE
     // ------------------------------
     if (focusModeActive) {
         console.log("DEBUG: Page loaded and focus mode active. Starting focus mode.");
         startFocusMode();
+
+    highlightToggle.addEventListener('click', function() {
+        setActiveTool('highlight');
+    });
+
+    eraserToggle.addEventListener('click', function() {
+        setActiveTool('eraser');
+    });
+
+    annotationToggle.addEventListener('click', function() {
+        setActiveTool('annotation');
+    });
+
+    document.addEventListener('mouseup', function() {
+        const selectedText = window.getSelection().toString().trim();
+        if (activeTool === 'highlight' && selectedText) {
+            highlightText(selectedText);
+            savePreferences();
+        } else if (activeTool === 'eraser' && selectedText) {
+            removeHighlight(selectedText);
+            savePreferences();
+        } else if (activeTool === 'annotation' && selectedText) {
+            addAnnotation(selectedText);
+            savePreferences();
+        }
+    });
+
+    function setActiveTool(tool) {
+        activeTool = tool;
+        highlightToggle.classList.toggle('bg-primary-200', tool === 'highlight');
+        eraserToggle.classList.toggle('bg-primary-200', tool === 'eraser');
+        annotationToggle.classList.toggle('bg-primary-200', tool === 'annotation');
+        document.body.style.cursor = tool === 'highlight' || tool === 'eraser' || tool === 'annotation' ? 'text' : 'default';
+    }
+
+    window.highlightText = function(text) {
+        console.log('Highlighting text:', text);
+        const content = readerContent.innerHTML;
+        const highlightedContent = content.replace(new RegExp(text, 'gi'), match => `<span class="bg-yellow-300">${match}</span>`);
+        readerContent.innerHTML = highlightedContent;
+        savePreferences();
+    }
+
+    window.removeHighlight = function(text) {
+        console.log('Removing highlight for text:', text);
+        const content = readerContent.innerHTML;
+        const unhighlightedContent = content.replace(/<span class="bg-yellow-300">(.*?)<\/span>/gi, (match, p1) => {
+            return p1.includes(text) ? p1 : match;
+        });
+        readerContent.innerHTML = unhighlightedContent;
+        savePreferences();
+    }
+
+    function addAnnotation(text, note = '') {
+        console.log('Adding annotation for text:', text);
+        const content = readerContent.innerHTML;
+        const annotatedContent = content.replace(new RegExp(text, 'gi'), match => `<span class="bg-blue-300 annotation" data-text="${text}">${match}</span>`);
+        readerContent.innerHTML = annotatedContent;
+        const annotationElement = document.createElement('div');
+        annotationElement.className = 'annotation-box';
+        annotationElement.innerHTML = `
+            <textarea class="annotation-note">${note}</textarea>
+            <button class="delete-annotation">Delete</button>
+            <button class="edit-annotation">Edit</button>
+            <button class="save-annotation">Save</button>
+        `;
+        document.body.appendChild(annotationElement);
+        annotationElement.querySelector('.delete-annotation').addEventListener('click', function() {
+            annotationElement.remove();
+            removeAnnotation(text);
+            savePreferences();
+        });
+        annotationElement.querySelector('.edit-annotation').addEventListener('click', function() {
+            annotationElement.querySelector('.annotation-note').disabled = false;
+        });
+        annotationElement.querySelector('.save-annotation').addEventListener('click', function() {
+            annotationElement.querySelector('.annotation-note').disabled = true;
+            savePreferences();
+        });
+        savePreferences();
+    }
+
+    function removeAnnotation(text) {
+        const content = readerContent.innerHTML;
+        const unannotatedContent = content.replace(/<span class="bg-blue-300 annotation" data-text="(.*?)">(.*?)<\/span>/gi, (match, p1, p2) => {
+            return p1.includes(text) ? p2 : match;
+        });
+        readerContent.innerHTML = unannotatedContent;
     }
 });
 </script>

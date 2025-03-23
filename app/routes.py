@@ -170,27 +170,6 @@ def json_version():
 def favicon():
     return send_from_directory(os.path.join(main_bp.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
-# Stub endpoints for new toolbar buttons
-@main_bp.route('/api/font-size', methods=['POST'])
-def api_font_size():
-    return jsonify({'status': 'success'})
-
-@main_bp.route('/api/font-family', methods=['POST'])
-def api_font_family():
-    return jsonify({'status': 'success'})
-
-@main_bp.route('/api/read-aloud', methods=['POST'])
-def api_read_aloud():
-    return jsonify({'status': 'success'})
-
-@main_bp.route('/api/spacing', methods=['POST'])
-def api_spacing():
-    return jsonify({'status': 'success'})
-
-@main_bp.route('/api/annotation', methods=['POST'])
-def api_annotation():
-    return jsonify({'status': 'success'})
-
 @main_bp.route('/api/chat', methods=['POST'])
 def api_chat():
     """

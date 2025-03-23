@@ -55,13 +55,6 @@
             </div>
         </form>
         
-        <div class="mt-12">
-            <p class="text-sm text-primary-600 dark:text-primary-400">
-                <i class="fas fa-leaf text-accent-500 mr-1"></i>
-                Stay focused longer, grow your digital garden
-            </p>
-        </div>
-        
         <!-- New Buttons -->
         <div class="mt-8 flex flex-col md:flex-row gap-4 justify-center">
             <button 
@@ -72,33 +65,21 @@
                 <i class="fas fa-bookmark mr-2"></i>
                 Bookmark This Page
             </button>
-            <button 
+            <!-- <button 
                 type="button" 
                 id="extension-button"
                 class="px-6 py-3 bg-accent-600 hover:bg-accent-700 text-white rounded-lg 
                       transition duration-200 shadow-md hover:shadow-lg flex-shrink-0">
                 <i class="fas fa-download mr-2"></i>
                 Download Chrome Extension
-            </button>
+            </button> -->
         </div>
 
         <!-- Saved Articles Section -->
-        <h2 class="text-xl font-bold mt-12 mb-4 text-primary-800 dark:text-primary-200 text-left">Saved Articles</h2>
-        <div id="saved-articles" class="flex overflow-x-auto space-x-4 p-4 border border-primary-300 dark:border-primary-700 rounded-lg">
+        <h2 class="text-xl font-bold mt-12 mb-4 text-primary-800 dark:text-primary-200 text-left hidden" id="saved-articles-title">Saved Articles</h2>
+        <div id="saved-articles" class="flex overflow-x-auto space-x-4 p-4 border border-primary-300 dark:border-primary-700 rounded-lg hidden">
             <!-- Saved articles will be dynamically added here -->
         </div>
-        <style>
-            #saved-articles {
-            display: flex;
-            overflow-x: auto;
-            max-width: 100%;
-            gap: 1rem;
-            }
-            #saved-articles .saved-article {
-            flex: 0 0 auto;
-            width: calc(50% - 0.5rem); /* Adjust width to show 2 cards */
-            }
-        </style>
     </div>
 </div>
 
@@ -241,7 +222,16 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Load saved articles from local storage
     const savedArticlesContainer = document.getElementById('saved-articles');
+    const savedArticlesTitle = document.getElementById('saved-articles-title');
     const savedArticles = JSON.parse(localStorage.getItem('savedArticles')) || [];
+    if (savedArticles.length > 0) {
+        savedArticlesContainer.classList.remove('hidden');
+        savedArticlesTitle.classList.remove('hidden');
+    } else {
+        savedArticlesContainer.remove();
+        savedArticlesTitle.remove();
+    }
+    console.log('Length of saved articles:', savedArticles.length);
     savedArticles.forEach((article, index) => {
         const articleElement = document.createElement('div');
         articleElement.className = 'saved-article bg-white dark:bg-gray-700 p-2 rounded-lg shadow-md relative group';
@@ -261,6 +251,10 @@ document.addEventListener('DOMContentLoaded', function() {
             savedArticles.splice(index, 1);
             localStorage.setItem('savedArticles', JSON.stringify(savedArticles));
             articleElement.remove();
+            if (savedArticles.length === 0) {
+                savedArticlesContainer.remove();
+                savedArticlesTitle.remove();
+            }
         });
     });
 });
