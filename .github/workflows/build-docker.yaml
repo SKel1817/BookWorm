@@ -57,5 +57,5 @@ jobs:
           --tag ${{ secrets.DOCKERHUB_USERNAME }}/bookworm:${{ env.version }} \
           --file Dockerfile .
 
-    - name: Clean Up Environment
-      run: docker-compose down
+    # - name: Clean Up Environment
+    #   run: docker-compose down
