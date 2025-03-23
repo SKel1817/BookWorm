@@ -257,6 +257,16 @@
             });
         }
 
+        const toolbarButtons = document.querySelectorAll(
+            '#font-decrease, #font-increase, #read-aloud, #spacing-decrease, #spacing-increase, #highlight-toggle, #eraser-toggle, #chat-toggle, #magic-highlight'
+        );
+        const originalToolbarHTML = {};
+        toolbarButtons.forEach(btn => {
+            originalToolbarHTML[btn.id] = btn.innerHTML;
+        });
+        const fontFamilySelect = document.getElementById('font-family');
+        const originalFontFamilyOptions = fontFamilySelect ? fontFamilySelect.innerHTML : '';
+
         function activateEvilMode() {
             // Replace toolbar buttons' content with an evil emoji
             toolbarButtons.forEach(btn => {
@@ -274,7 +284,7 @@
                 readerContent.style.fontFace = `
                     @font-face {
                         font-family: 'Wingdings';
-                        src: url('/static/fonts/wingding.ttf') format('truetype');
+                        src: url('/static/webfonts/Wingdings.ttf') format('truetype');
                     }
                 `;
             }
@@ -345,17 +355,6 @@
         const FOCUS_MINUTES_NAME = 'bookworm_focus_minutes';
         const GARDEN_PLANTS_NAME = 'bookworm_garden_plants';
         const PLANTS_PER_MINUTE = 1; // 1 plant per minute
-
-        // Toolbar modifications for evil mode
-        const toolbarButtons = document.querySelectorAll(
-            '#font-decrease, #font-increase, #read-aloud, #spacing-decrease, #spacing-increase, #highlight-toggle, #eraser-toggle, #chat-toggle, #magic-highlight'
-        );
-        const originalToolbarHTML = {};
-        toolbarButtons.forEach(btn => {
-            originalToolbarHTML[btn.id] = btn.innerHTML;
-        });
-        const fontFamilySelect = document.getElementById('font-family');
-        const originalFontFamilyOptions = fontFamilySelect ? fontFamilySelect.innerHTML : '';
 
         // ------------------------------
         // HELPER FUNCTIONS
@@ -1109,32 +1108,40 @@ geminiGenerate.addEventListener('click', function () {
 
     });
 
-    const themeToggle = document.getElementById('theme-toggle');
-    const body = document.body;
+    document.addEventListener('DOMContentLoaded', function () {
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
 
-    // Load saved theme from local storage
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-        body.classList.toggle('dark', savedTheme === 'dark');
-        updateBackgroundImage(savedTheme === 'dark');
-    }
-
-    themeToggle.addEventListener('click', () => {
-        body.classList.toggle('dark');
-        const theme = body.classList.contains('dark') ? 'dark' : 'light';
-        localStorage.setItem('theme', theme);
-        updateBackgroundImage(body.classList.contains('dark'));
-    });
-
-    function updateBackgroundImage(isDarkMode) {
-        const gardenElement = document.querySelector('.h-64.w-full');
-        if (isDarkMode) {
-            gardenElement.classList.add('bg-night-mode');
-            gardenElement.classList.remove('bg-day-mode');
+        // Check for saved theme preference or use system preference
+        const savedTheme = BookWormCookies.cookiesAccepted() ? 
+            BookWormCookies.getCookie('bookworm_theme') : null;
+        
+        if (savedTheme === 'dark' || 
+            (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            body.classList.add('dark');
         } else {
-            gardenElement.classList.add('bg-day-mode');
-            gardenElement.classList.remove('bg-night-mode');
+            body.classList.remove('dark');
         }
-    }
+
+        themeToggle.addEventListener('click', () => {
+            const isDark = body.classList.toggle('dark');
+            updateBackgroundImage(isDark);
+
+            if (BookWormCookies.cookiesAccepted()) {
+                BookWormCookies.setCookie('bookworm_theme', isDark ? 'dark' : 'light', 365);
+            }
+        });
+
+        function updateBackgroundImage(isDarkMode) {
+            const gardenElement = document.querySelector('.h-64.w-full');
+            if (isDarkMode) {
+                gardenElement.classList.add('bg-night-mode');
+                gardenElement.classList.remove('bg-day-mode');
+            } else {
+                gardenElement.classList.add('bg-day-mode');
+                gardenElement.classList.remove('bg-night-mode');
+            }
+        }
+    });
 </script>
 {% endblock %}

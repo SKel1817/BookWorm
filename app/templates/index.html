@@ -283,18 +283,24 @@ document.addEventListener('DOMContentLoaded', function() {
     const themeToggle = document.getElementById('theme-toggle');
     const body = document.body;
 
-    // Load saved theme from local storage
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-        body.classList.toggle('dark', savedTheme === 'dark');
-        updateBackgroundImage(savedTheme === 'dark');
+    // Check for saved theme preference or use system preference
+    const savedTheme = BookWormCookies.cookiesAccepted() ? 
+        BookWormCookies.getCookie('bookworm_theme') : null;
+    
+    if (savedTheme === 'dark' || 
+        (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        body.classList.add('dark');
+    } else {
+        body.classList.remove('dark');
     }
 
     themeToggle.addEventListener('click', () => {
-        body.classList.toggle('dark');
-        const theme = body.classList.contains('dark') ? 'dark' : 'light';
-        localStorage.setItem('theme', theme);
-        updateBackgroundImage(body.classList.contains('dark'));
+        const isDark = body.classList.toggle('dark');
+        updateBackgroundImage(isDark);
+
+        if (BookWormCookies.cookiesAccepted()) {
+            BookWormCookies.setCookie('bookworm_theme', isDark ? 'dark' : 'light', 365);
+        }
     });
 
     function updateBackgroundImage(isDarkMode) {

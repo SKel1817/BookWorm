@@ -5,7 +5,14 @@ body {
 
 @font-face {
     font-family: 'OpenDyslexic';
-    src: url('/static/webfonts/opendyslexic3-regular.ttf') format('truetype');
+    src: url('/static/webfonts/OpenDyslexic3-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+
+@font-face {
+    font-family: 'Wingdings';
+    src: url('/static/webfonts/Wingdings.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
   }
