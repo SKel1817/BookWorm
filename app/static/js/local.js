@@ -96,5 +96,9 @@ function showToast(message, type = 'error') {
         toast.classList.add('hidden');
     }, 3000);
 }
-
+module.exports = {
+    plugins: [
+      require('@tailwindcss/aspect-ratio'),
+    ],
+  }
 console.log('Local JS file loaded');
