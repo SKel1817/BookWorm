@@ -149,12 +149,12 @@
                     </button>
                     <div class="flex space-x-4 mb-0">
                         <!-- Font Color Dropdown -->
-                        <div class="relative">
+                        <div class="relative" title="Change font color">
                           <button id="toggle-font-color" class="p-2 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition">
                             <i class="fas fa-palette text-sm text-primary-600 dark:text-primary-300"></i>
                           </button>
                           <div id="dropdown-font-color" class="absolute left-0 mt-2 hidden z-10">
-                            <select id="font-color" class="bg-white dark:bg-[#333333] border border-primary-300 dark:border-primary-700 rounded px-2 py-1 text-sm" title="Change font color">
+                            <select id="font-color" class="bg-white dark:bg-[#333333] border border-primary-300 dark:border-primary-700 rounded px-2 py-1 text-sm">
                               <option value="default">Default</option>
                               <option value="red">Red</option>
                               <option value="blue">Blue</option>
@@ -166,7 +166,7 @@
                         </div>
                       
                         <!-- Font Family Dropdown -->
-                        <div class="relative">
+                        <div class="relative" title="Change font family">
                           <button id="toggle-font-family" class="p-2 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition">
                             <i class="fas fa-i-cursor text-sm text-primary-600 dark:text-primary-300"></i>
                           </button>
@@ -184,12 +184,12 @@
                         </div>
                       
                         <!-- Color Blind Options Dropdown -->
-                        <div class="relative">
+                        <div class="relative" title="Accommodate color blindness">
                           <button id="toggle-color-blind" class="p-2 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition">
                             <i class="fas fa-droplet text-sm text-primary-600 dark:text-primary-300"></i>
                           </button>
                           <div id="dropdown-color-blind" class="absolute left-0 mt-2 hidden z-10">
-                            <select id="color-blind" class="bg-white dark:bg-[#333333] border border-primary-300 dark:border-primary-700 rounded px-2 py-1 text-sm" title="Accomodate color blindness">
+                            <select id="color-blind" class="bg-white dark:bg-[#333333] border border-primary-300 dark:border-primary-700 rounded px-2 py-1 text-sm">
                               <option value="default">No Accommodation</option>
                               <option value="deuteranomaly">Deuteranomaly</option>
                               <option value="protanomaly">Protanomaly</option>
@@ -310,7 +310,7 @@
         <footer class="bg-[#f0ece5] dark:bg-[#292929] text-center p-4 text-sm text-primary-700 dark:text-primary-300">
             {% block footer %}
             {% endblock %}
-            <p>&copy; 2025 BookWorm - Simplifying online reading</p>
+            <p>&copy; 2025 BookWorm - Reading online, reimagined for focus and accessibility</p>
         </footer>
     </div>
     
@@ -339,7 +339,7 @@
     </div>
 
     <div id="loading-screen">
-        <div>
+        <div class="text-center">
             <i id="loading-icon" class="fas fa-search"></i>
             <div id="loading-text">Loading...</div>
         </div>

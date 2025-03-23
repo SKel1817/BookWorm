@@ -43,3 +43,9 @@ body {
     width: calc(50% - 0.5rem); /* Adjust width to show 2 cards */
 }
 
+.bg-day-mode {
+  background-image: url('/static/images/Day_BG_Long.png');
+}
+.bg-night-mode {
+  background-image: url('/static/images/Night_BG_Long.png') !important;
+}

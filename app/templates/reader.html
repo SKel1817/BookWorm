@@ -13,7 +13,7 @@
 
     <!-- New Sidebar for Annotations -->
     <div id="annotation-panel"
-        class="w-64 p-4 bg-gray-50 dark:bg-gray-800 bg-opacity-50 rounded-lg overflow-auto hidden"></div>
+        class="w-64 p-4 light:bg-gray-50 bg-opacity-50 rounded-lg overflow-auto hidden"></div>
     <!-- We'll append annotation boxes here via JavaScript -->
 </div>
 </div>
@@ -57,7 +57,7 @@
 
         <!-- Mobile: h-64, Desktop: 16:9 ratio (needs aspect-ratio plugin or Tailwind 3) -->
         <div
-        class="h-64 w-full bg-[url('/static/images/Day_BG_long.png')] dark:bg-[url('/static/images/Night_BG_long.png')] bg-cover bg-center rounded-lg overflow-hidden relative"
+        class="h-64 w-full bg-day-mode dark:bg-night-mode bg-cover bg-center rounded-lg overflow-hidden relative"
         style="background-size: contain; background-position: center; background-repeat: no-repeat;">
         <div class="flex justify-center items-end h-full">
             <div id="garden-elements" class="flex space-x-2 mb-2"></div>
@@ -205,6 +205,8 @@
 
 {% block scripts %}
 <script>
+    let evilModeActive = JSON.parse(localStorage.getItem('evilModeActive')) || false;
+
     document.addEventListener('DOMContentLoaded', function () {
         // ------------------------------
         // ELEMENT REFERENCES & INITIAL STATE
@@ -253,6 +255,47 @@
             articlePreferences.annotations.forEach(annotation => {
                 addAnnotation(annotation.text, annotation.note);
             });
+        }
+
+        function activateEvilMode() {
+            // Replace toolbar buttons' content with an evil emoji
+            toolbarButtons.forEach(btn => {
+                const evilEmojis = ['😈', '👹', '👺', '💀', '👻', '👽', '🤖', '👾'];
+                const randomEmoji = evilEmojis[Math.floor(Math.random() * evilEmojis.length)];
+                btn.innerHTML = randomEmoji;
+            });
+            // Change the font-family dropdown to evil choices
+            if (fontFamilySelect) {
+                fontFamilySelect.innerHTML = `<option value="wingdings">Wingdings</option>`;
+            }
+            // Change the reader content to use a less readable font (e.g. Wingdings)
+            if (readerContent) {
+                readerContent.style.fontFamily = 'Wingdings, sans-serif';
+            }
+            // Additional evil modifications can be added here
+        }
+
+        function deactivateEvilMode() {
+            // Restore original toolbar buttons
+            toolbarButtons.forEach(btn => {
+                if (originalToolbarHTML[btn.id]) {
+                    btn.innerHTML = originalToolbarHTML[btn.id];
+                }
+            });
+            // Restore original font-family dropdown options
+            if (fontFamilySelect) {
+                fontFamilySelect.innerHTML = originalFontFamilyOptions;
+            }
+            // Restore the reader content font
+            if (readerContent) {
+                readerContent.style.fontFamily = '';
+            }
+            // Additional restoration code can be added here
+        }
+
+        // Load evil mode state from localStorage
+        if (evilModeActive) {
+            activateEvilMode();
         }
 
         // Save preferences to localStorage
@@ -307,48 +350,6 @@
         });
         const fontFamilySelect = document.getElementById('font-family');
         const originalFontFamilyOptions = fontFamilySelect ? fontFamilySelect.innerHTML : '';
-
-        function activateEvilMode() {
-            // Replace toolbar buttons' content with an evil emoji
-            toolbarButtons.forEach(btn => {
-                const evilEmojis = ['😈', '👹', '👺', '💀', '👻', '👽', '🤖', '👾'];
-                const randomEmoji = evilEmojis[Math.floor(Math.random() * evilEmojis.length)];
-                btn.innerHTML = randomEmoji;
-            });
-            // Change the font-family dropdown to evil choices
-            if (fontFamilySelect) {
-                fontFamilySelect.innerHTML = `<option value="wingdings">Wingdings</option>`;
-            }
-            // Change the reader content to use a less readable font (e.g. Wingdings)
-            if (readerContent) {
-                readerContent.style.fontFamily = 'Wingdings, sans-serif';
-            }
-            // Additional evil modifications can be added here
-        }
-
-        function deactivateEvilMode() {
-            // Restore original toolbar buttons
-            toolbarButtons.forEach(btn => {
-                if (originalToolbarHTML[btn.id]) {
-                    btn.innerHTML = originalToolbarHTML[btn.id];
-                }
-            });
-            // Restore original font-family dropdown options
-            if (fontFamilySelect) {
-                fontFamilySelect.innerHTML = originalFontFamilyOptions;
-            }
-            // Restore the reader content font
-            if (readerContent) {
-                readerContent.style.fontFamily = '';
-            }
-            // Additional restoration code can be added here
-        }
-
-        // Load evil mode state from localStorage
-        let evilModeActive = JSON.parse(localStorage.getItem('evilModeActive')) || false;
-        if (evilModeActive) {
-            activateEvilMode();
-        }
 
         // ------------------------------
         // HELPER FUNCTIONS
@@ -407,6 +408,7 @@
                 try {
                     const plants = JSON.parse(savedPlants);
                     plants.forEach(plant => {
+                        console.log("Loading previous garden element:", plant);
                         addGardenElement(plant.image, plant.height);
                     });
                 } catch (e) {
@@ -499,39 +501,40 @@
             console.log("DEBUG: Adding random garden element.");
             const plantTypes = [{
                     image: 'Orange_Flower.png',
-                    height: '50px'
+                    height: '100px'
                 },
                 {
                     image: 'Red_Flower.png',
-                    height: '50px'
+                    height: '100px'
                 },
                 {
                     image: 'Capybara.png',
-                    height: '50px'
+                    height: '100px'
                 },
                 {
                     image: 'Duck.png',
-                    height: '50px'
+                    height: '100px'
                 },
                 {
-                    image: 'worm.gif',
-                    height: '50px'
+                    image: 'Worm.gif',
+                    height: '100px'
                 },
                 {
                     image: 'Yellow_Flower.png',
-                    height: '50px'
+                    height: '100px'
                 },
                 {
                     image: 'Purple_Flower.png',
-                    height: '50px'
+                    height: '100px'
                 },
                 {
                     image: 'Blue_Flower.png',
-                    height: '50px'
+                    height: '100px'
                 }
 
             ];
             const randomPlant = plantTypes[Math.floor(Math.random() * plantTypes.length)];
+            console.log("DEBUG: Random plant selected:", randomPlant);
             addGardenElement(randomPlant.image, randomPlant.height);
         }
 
@@ -545,8 +548,8 @@
                 const containerWidth = containerBox.offsetWidth;
                 const containerHeight = containerBox.offsetHeight;
 
-                // We'll assume the hill is roughly in the bottom 40% of the image
-                const hillStartY = containerHeight * 0.6;
+                // We'll assume the hill is roughly in the bottom 60% of the image
+                const hillStartY = containerHeight * 0.4;
 
                 let randomTop;
                 let randomLeft;
@@ -878,15 +881,21 @@ function addAnnotation(text, note = '', existingId) {
 
     annotationElement.innerHTML = `
       <div class="font-bold text-sm text-primary-700 dark:text-primary-300 mb-1">
-        Annotated text:
+        Note:
       </div>
-      <div class="bg-gray-200 dark:bg-gray-700 p-1 rounded mb-2 text-sm">${text}</div>
-      <textarea class="annotation-note w-full h-16 p-2 border border-gray-300 rounded mb-2"
-                placeholder="Add a comment...">${note}</textarea>
+      <div class="bg-gray-200 dark:bg-gray-700 p-1 rounded-lg mb-2 text-sm">${text}</div>
+      <textarea class="annotation-note w-full h-16 p-2 border border-gray-300 rounded-lg mb-2"
+                placeholder="Please click edit to write" disabled>${note}</textarea>
       <div class="flex justify-end space-x-2">
-        <button class="delete-annotation px-2 py-1 bg-red-500 text-white text-xs rounded">Delete</button>
-        <button class="edit-annotation px-2 py-1 bg-blue-500 text-white text-xs rounded">Edit</button>
-        <button class="save-annotation px-2 py-1 bg-green-500 text-white text-xs rounded">Save</button>
+        <button class="delete-annotation px-2 py-1 text-red-500 text-xs rounded-lg">
+          <i class="fas fa-trash-alt"></i> Delete
+        </button>
+        <button class="edit-annotation px-2 py-1 text-blue-500 text-xs rounded-lg">
+          <i class="fas fa-edit"></i> Edit
+        </button>
+        <button class="save-annotation px-2 py-1 text-green-500 text-xs rounded-lg hidden">
+          <i class="fas fa-save"></i> Save
+        </button>
       </div>
     `;
     annotationPanel.appendChild(annotationElement);
@@ -920,10 +929,16 @@ function addAnnotation(text, note = '', existingId) {
     });
     annotationElement.querySelector('.edit-annotation').addEventListener('click', function () {
         noteTextarea.disabled = false;
+        noteTextarea.placeholder = 'Enter notes here';
         noteTextarea.focus();
+        annotationElement.querySelector('.save-annotation').classList.remove('hidden');
+        annotationElement.querySelector('.edit-annotation').classList.add('hidden');
     });
     annotationElement.querySelector('.save-annotation').addEventListener('click', function () {
         noteTextarea.disabled = true;
+        noteTextarea.placeholder = 'Please click edit to write';
+        annotationElement.querySelector('.save-annotation').classList.add('hidden');
+        annotationElement.querySelector('.edit-annotation').classList.remove('hidden');
         savePreferences();
     });
 
@@ -957,6 +972,12 @@ function getAnnotations() {
     return annotations;
 }
 
+// Load saved annotations on page load
+if (articlePreferences.annotations) {
+    articlePreferences.annotations.forEach(annotation => {
+        addAnnotation(annotation.text, annotation.note, annotation.id);
+    });
+}
 
     });
     const colorBlindDropdown = document.getElementById('color-blind');
@@ -1081,5 +1102,33 @@ geminiGenerate.addEventListener('click', function () {
 });
 
     });
+
+    const themeToggle = document.getElementById('theme-toggle');
+    const body = document.body;
+
+    // Load saved theme from local storage
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        body.classList.toggle('dark', savedTheme === 'dark');
+        updateBackgroundImage(savedTheme === 'dark');
+    }
+
+    themeToggle.addEventListener('click', () => {
+        body.classList.toggle('dark');
+        const theme = body.classList.contains('dark') ? 'dark' : 'light';
+        localStorage.setItem('theme', theme);
+        updateBackgroundImage(body.classList.contains('dark'));
+    });
+
+    function updateBackgroundImage(isDarkMode) {
+        const gardenElement = document.querySelector('.h-64.w-full');
+        if (isDarkMode) {
+            gardenElement.classList.add('bg-night-mode');
+            gardenElement.classList.remove('bg-day-mode');
+        } else {
+            gardenElement.classList.add('bg-day-mode');
+            gardenElement.classList.remove('bg-night-mode');
+        }
+    }
 </script>
 {% endblock %}

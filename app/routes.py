@@ -238,6 +238,12 @@ def api_chat_status():
         'model': gemini_ai.model
     })
 
+# Route to get any files from the static directory
+@main_bp.route('/static/<path:filename>')
+def static_files(filename):
+    """Serve static files from the static directory"""
+    return send_from_directory(os.path.join(main_bp.root_path, 'static'), filename)
+
 @main_bp.route('/healthcheck', methods=['GET'])
 def healthcheck():
     """Health check endpoint for the application"""
