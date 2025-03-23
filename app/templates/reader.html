@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ title }} - BookWorm Reader{% endblock %}
+{% block title %}{{ title }} | BookWorm Reader{% endblock %}
 
 {% block content %}
 <div class="max-w-4xl mx-auto bg-white dark:bg-[#222222] rounded-lg shadow-lg mb-12 overflow-hidden">
@@ -337,20 +337,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Annotation mode toggle
-    annotationMode.addEventListener('click', () => {
-        isAnnotationMode = !isAnnotationMode;
-        if (isAnnotationMode) {
-            annotationMode.classList.add('bg-accent-200', 'dark:bg-accent-800');
-            document.body.style.cursor = 'text';
-            enableAnnotationMode();
-        } else {
-            annotationMode.classList.remove('bg-accent-200', 'dark:bg-accent-800');
-            document.body.style.cursor = 'default';
-            disableAnnotationMode();
-        }
-    });
-    
     // Read aloud functionality
     readAloud.addEventListener('click', () => {
         if (!isReading) {
@@ -541,6 +527,87 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
+
+    const highlightToggle = document.getElementById('highlight-toggle');
+    const eraserToggle = document.getElementById('eraser-toggle');
+    let activeTool = null;
+
+    highlightToggle.addEventListener('click', function() {
+        setActiveTool('highlight');
+    });
+
+    eraserToggle.addEventListener('click', function() {
+        setActiveTool('eraser');
+    });
+
+    document.addEventListener('mouseup', function() {
+        const selectedText = window.getSelection().toString().trim();
+        if (activeTool === 'highlight' && selectedText) {
+            highlightText(selectedText);
+        } else if (activeTool === 'eraser' && selectedText) {
+            removeHighlight(selectedText);
+        }
+    });
+
+    function setActiveTool(tool) {
+        activeTool = tool;
+        highlightToggle.classList.toggle('bg-primary-200', tool === 'highlight');
+        eraserToggle.classList.toggle('bg-primary-200', tool === 'eraser');
+        document.body.style.cursor = tool === 'highlight' || tool === 'eraser' ? 'text' : 'default';
+    }
+
+    window.highlightText = function(text) {
+        const content = readerContent.innerHTML;
+        const highlightedContent = content.replace(new RegExp(text, 'gi'), match => `<span class="bg-yellow-300">${match}</span>`);
+        readerContent.innerHTML = highlightedContent;
+    }
+
+    window.removeHighlight = function(text) {
+        const content = readerContent.innerHTML;
+        const unhighlightedContent = content.replace(/<span class="bg-yellow-300">(.*?)<\/span>/gi, (match, p1) => {
+            return p1.includes(text) ? p1 : match;
+        });
+        readerContent.innerHTML = unhighlightedContent;
+    }
+
+    const magicHighlight = document.getElementById('magic-highlight');
+    const loadingScreen = document.getElementById('loading-screen');
+
+    magicHighlight.addEventListener('click', function() {
+        loadingScreen.style.display = 'flex';
+        const content = document.getElementById('reader-content').innerText;
+
+        fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: `You are a text summarization agent, which has the capability to highlight important aspects or key points of an article below. For all of the text in the article, please respond with a highlight(text) function, stating the exact text that you want highlighted. Separate these functions by semicolons, and ONLY respond with the function calls and nothing else. Feel free to highlight more often, as this will help the user. Here is the article: ${content}`
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            if (data.success) {
+            const highlights = data.response.match(/highlight\((.*?)\);/g);
+            if (highlights) {
+                highlights.forEach(call => {
+                const textToHighlight = call.match(/highlight\((.*?)\);/)[1];
+                highlightText(textToHighlight.replace(/['"]/g, ''));
+                });
+            }
+            } else {
+            showToast('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            showToast('Error: ' + error.message);
+        })
+        .finally(() => {
+            loadingScreen.style.display = 'none';
+        });
+    });
 });
 </script>
 {% endblock %}

@@ -61,7 +61,132 @@
                 Stay focused longer, grow your digital garden
             </p>
         </div>
+        
+        <!-- New Buttons -->
+        <div class="mt-8 flex flex-col md:flex-row gap-4 justify-center">
+            <button 
+                type="button" 
+                id="bookmark-button"
+                class="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white rounded-lg 
+                      transition duration-200 shadow-md hover:shadow-lg flex-shrink-0">
+                <i class="fas fa-bookmark mr-2"></i>
+                Bookmark This Page
+            </button>
+            <button 
+                type="button" 
+                id="extension-button"
+                class="px-6 py-3 bg-accent-600 hover:bg-accent-700 text-white rounded-lg 
+                      transition duration-200 shadow-md hover:shadow-lg flex-shrink-0">
+                <i class="fas fa-download mr-2"></i>
+                Download Chrome Extension
+            </button>
+        </div>
     </div>
+</div>
+
+<!-- Scroll Down Banner -->
+<div class="absolute bottom-0 left-0 right-0 text-center mb-4">
+    <p class="text-primary-700 dark:text-primary-300">Scroll down for more</p>
+    <i class="fas fa-chevron-down text-primary-700 dark:text-primary-300 animate-bounce text-2xl"></i>
+</div>
+
+<!-- Bookmark Modal -->
+<div id="bookmark-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden px-4">
+    <div class="bg-white dark:bg-[#2a2a2a] p-6 rounded-lg shadow-lg max-w-md w-full">
+        <h2 class="text-2xl font-bold mb-4 text-primary-800 dark:text-primary-200">Interactive Bookmark!</h2>
+        <p class="mb-4 text-primary-700 dark:text-primary-300">You can make a custom bookmark that will put any article in our site automatically. To bookmark this page, follow these steps:</p>
+        <ol class="list-decimal list-inside mb-4 text-primary-700 dark:text-primary-300">
+            <li>Click the star icon in your browser's address bar.</li>
+            <li>In the URL field, replace the current URL with the following custom URL!</li>
+            <li>
+                <code class="bg-gray-100 dark:bg-gray-800 p-2 rounded-md text-sm break-all" id="bookmark-url"></code>
+            </li>
+        </ol>
+        <div class="flex justify-end gap-2">
+            <button 
+                type="button" 
+                id="copy-bookmark"
+                class="px-4 py-2 bg-accent-600 hover:bg-accent-700 text-white rounded-lg 
+                      transition duration-200 shadow-md hover:shadow-lg">
+                Copy to Clipboard
+            </button>
+            <button 
+                type="button" 
+                id="close-modal"
+                class="px-4 py-2 bg-accent-600 hover:bg-accent-700 text-white rounded-lg 
+                      transition duration-200 shadow-md hover:shadow-lg">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Features and Instructions Section -->
+<div class="mt-[100vh] max-w-3xl mx-auto text-center">
+    <h2 class="text-4xl font-bold mb-4 text-primary-800 dark:text-primary-200">Discover the Power of BookWorm</h2>
+    <p class="text-xl mb-8 text-primary-700 dark:text-primary-300">Your ultimate tool for a distraction-free reading experience</p>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="flex items-start">
+            <i class="fas fa-font text-3xl text-accent-600 mr-4"></i>
+            <div>
+                <h3 class="text-2xl font-semibold text-primary-800 dark:text-primary-200">Customizable Fonts</h3>
+                <p class="text-primary-700 dark:text-primary-300">Adjust fonts and spacing to suit your reading style.</p>
+            </div>
+        </div>
+        <div class="flex items-start">
+            <i class="fas fa-leaf text-3xl text-accent-600 mr-4"></i>
+            <div>
+                <h3 class="text-2xl font-semibold text-primary-800 dark:text-primary-200">Focus-Enhancing Environment</h3>
+                <p class="text-primary-700 dark:text-primary-300">Minimize distractions and stay focused longer.</p>
+            </div>
+        </div>
+        <div class="flex items-start">
+            <i class="fas fa-seedling text-3xl text-accent-600 mr-4"></i>
+            <div>
+                <h3 class="text-2xl font-semibold text-primary-800 dark:text-primary-200">Interactive Focus Garden</h3>
+                <p class="text-primary-700 dark:text-primary-300">Grow your digital garden as you read.</p>
+            </div>
+        </div>
+        <div class="flex items-start">
+            <i class="fas fa-volume-up text-3xl text-accent-600 mr-4"></i>
+            <div>
+                <h3 class="text-2xl font-semibold text-primary-800 dark:text-primary-200">Read Aloud Functionality</h3>
+                <p class="text-primary-700 dark:text-primary-300">Listen to articles with our read aloud feature.</p>
+            </div>
+        </div>
+        <div class="flex items-start">
+            <i class="fas fa-highlighter text-3xl text-accent-600 mr-4"></i>
+            <div>
+                <h3 class="text-2xl font-semibold text-primary-800 dark:text-primary-200">Annotation Tools</h3>
+                <p class="text-primary-700 dark:text-primary-300">Highlight and annotate important text.</p>
+            </div>
+        </div>
+        <div class="flex items-start">
+            <i class="fas fa-magic text-3xl text-accent-600 mr-4"></i>
+            <div>
+                <h3 class="text-2xl font-semibold text-primary-800 dark:text-primary-200">Magic Highlight</h3>
+                <p class="text-primary-700 dark:text-primary-300">Automatically highlight key points in articles.</p>
+            </div>
+        </div>
+        <div class="flex items-start">
+            <i class="fas fa-bookmark text-3xl text-accent-600 mr-4"></i>
+            <div>
+                <h3 class="text-2xl font-semibold text-primary-800 dark:text-primary-200">Bookmark Articles</h3>
+                <p class="text-primary-700 dark:text-primary-300">Save your favorite articles for easy access later.</p>
+            </div>
+        </div>
+    </div>
+    <h2 class="text-4xl font-bold mt-12 mb-4 text-primary-800 dark:text-primary-200">How to Use BookWorm</h2>
+    <p class="text-xl mb-8 text-primary-700 dark:text-primary-300">Follow these simple steps to get started</p>
+    <ol class="list-decimal list-inside mb-8 text-primary-700 dark:text-primary-300">
+        <li class="mb-4"><i class="fas fa-paste text-accent-600 mr-2"></i>Paste the URL of the article you want to read in the input field above.</li>
+        <li class="mb-4"><i class="fas fa-book-open text-accent-600 mr-2"></i>Click the "Read" button to transform the article into a distraction-free reading experience.</li>
+        <li class="mb-4"><i class="fas fa-sliders-h text-accent-600 mr-2"></i>Use the toolbar to customize your reading experience (font size, font family, spacing, etc.).</li>
+        <li class="mb-4"><i class="fas fa-leaf text-accent-600 mr-2"></i>Enable Focus Mode to grow your digital garden while you read.</li>
+        <li class="mb-4"><i class="fas fa-highlighter text-accent-600 mr-2"></i>Use the annotation tools to highlight important text or add notes.</li>
+        <li class="mb-4"><i class="fas fa-magic text-accent-600 mr-2"></i>Click the "Magic Highlight" button to automatically highlight key points in the article.</li>
+        <li class="mb-4"><i class="fas fa-bookmark text-accent-600 mr-2"></i>Bookmark your favorite articles for easy access later.</li>
+    </ol>
 </div>
 {% endblock %}
 
@@ -70,6 +195,13 @@
 document.addEventListener('DOMContentLoaded', function() {
     const pasteButton = document.getElementById('paste-button');
     const urlInput = document.getElementById('url-input');
+    const bookmarkButton = document.getElementById('bookmark-button');
+    const bookmarkModal = document.getElementById('bookmark-modal');
+    const closeModal = document.getElementById('close-modal');
+    const bookmarkUrl = document.getElementById('bookmark-url');
+    const currentUrl = window.location.origin;
+    const bookmarkCode = `javascript:window.location='${currentUrl}/reader?url='+location.href;`;
+    bookmarkUrl.textContent = bookmarkCode;
     
     pasteButton.addEventListener('click', async function() {
         try {
@@ -77,8 +209,16 @@ document.addEventListener('DOMContentLoaded', function() {
             urlInput.value = text;
         } catch (err) {
             console.error('Failed to read clipboard: ', err);
-            alert('Please grant clipboard permission to use this feature');
+            showToast('Please grant clipboard permission to use this feature');
         }
+    });
+    
+    bookmarkButton.addEventListener('click', function() {
+        bookmarkModal.classList.remove('hidden');
+    });
+    
+    closeModal.addEventListener('click', function() {
+        bookmarkModal.classList.add('hidden');
     });
 });
 </script>

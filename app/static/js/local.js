@@ -79,4 +79,22 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+document.addEventListener('DOMContentLoaded', function() {
+    const loadingScreen = document.getElementById('loading-screen');
+    loadingScreen.style.display = 'none';
+});
+
+// Function to show toast message
+function showToast(message, type = 'error') {
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toast-message');
+    toastMessage.textContent = message;
+    toast.classList.remove('hidden');
+    toast.classList.remove('bg-green-500', 'bg-red-500');
+    toast.classList.add(`bg-${type === 'success' ? 'green' : 'red'}-500`);
+    setTimeout(() => {
+        toast.classList.add('hidden');
+    }, 3000);
+}
+
 console.log('Local JS file loaded');

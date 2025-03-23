@@ -85,29 +85,4 @@
     </form>
     {% endif %}
 </div>
-
-<!-- Toast Notification -->
-<div id="toast" class="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-md shadow-md hidden">
-    <p id="toast-message"></p>
-</div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const toast = document.getElementById('toast');
-        const toastMessage = document.getElementById('toast-message');
-        
-        {% if get_flashed_messages() %}
-        {% for message in get_flashed_messages(with_categories=true) %}
-        toastMessage.textContent = "{{ message[1] }}";
-        toast.classList.remove('hidden');
-        toast.classList.add('bg-{{ 'green' if message[0] == 'success' else 'red' }}-500');
-        setTimeout(() => {
-            toast.classList.add('hidden');
-        }, 3000);
-        {% endfor %}
-        {% endif %}
-    });
-</script>
 {% endblock %}

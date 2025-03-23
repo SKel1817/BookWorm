@@ -85,3 +85,19 @@ class GeminiAI:
 
 # Create a singleton instance
 gemini_ai = GeminiAI()
+
+if __name__ == "__main__":
+    if not gemini_ai.is_available():
+        print("Gemini API is not available or properly configured.")
+    else:
+        print("Gemini API interactive chat session started. Type 'exit' to quit.")
+        while True:
+            user_input = input("You: ")
+            if user_input.lower() == 'exit':
+                print("Exiting chat session.")
+                break
+            response = gemini_ai.generate_response(user_input)
+            if response['success']:
+                print(f"Gemini: {response['response']}")
+            else:
+                print(f"Error: {response['error']}")
