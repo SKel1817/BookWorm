@@ -588,6 +588,44 @@ colorBlindDropdown.addEventListener('change', function() {
     }
     // If "default" is selected, no extra filter classes are applied.
 });
+document.addEventListener('DOMContentLoaded', function() {
+  // Get button and container elements for each dropdown
+  const btnFontColor = document.getElementById('toggle-font-color');
+  const btnFontFamily = document.getElementById('toggle-font-family');
+  const btnColorBlind = document.getElementById('toggle-color-blind');
+
+  const containerFontColor = document.getElementById('dropdown-font-color');
+  const containerFontFamily = document.getElementById('dropdown-font-family');
+  const containerColorBlind = document.getElementById('dropdown-color-blind');
+
+  // Toggle font color dropdown
+  btnFontColor.addEventListener('click', function() {
+    containerFontColor.classList.toggle('hidden');
+  });
+
+  // Toggle font family dropdown
+  btnFontFamily.addEventListener('click', function() {
+    containerFontFamily.classList.toggle('hidden');
+  });
+
+  // Toggle color blindness dropdown
+  btnColorBlind.addEventListener('click', function() {
+    containerColorBlind.classList.toggle('hidden');
+  });
+});
+document.getElementById('font-color').addEventListener('change', function() {
+  document.getElementById('dropdown-font-color').classList.add('hidden');
+});
+document.getElementById('font-family').addEventListener('change', function() {
+  document.getElementById('dropdown-font-family').classList.add('hidden');
+});
+document.getElementById('color-blind').addEventListener('change', function() {
+  document.getElementById('dropdown-color-blind').classList.add('hidden');
+});
+
+
+
+
 
 </script>
 {% endblock %}
