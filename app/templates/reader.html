@@ -564,5 +564,30 @@ document.addEventListener('DOMContentLoaded', function() {
         startFocusMode();
     }
 });
+const colorBlindDropdown = document.getElementById('color-blind');
+
+colorBlindDropdown.addEventListener('change', function() {
+    const selectedValue = this.value;
+    // Get all images within the reader content container
+    const images = document.querySelectorAll('#reader-content img');
+
+    // Remove any previously applied filter classes from all images
+    images.forEach(img => {
+        img.classList.remove('deuteranomaly-filter', 'protanomaly-filter', 'deuteranopia-filter', 'protanopia-filter');
+    });
+
+    // Apply the appropriate filter based on the user's selection
+    if (selectedValue === 'deuteranomaly') {
+        images.forEach(img => img.classList.add('deuteranomaly-filter'));
+    } else if (selectedValue === 'protanomaly') {
+        images.forEach(img => img.classList.add('protanomaly-filter'));
+    } else if (selectedValue === 'deuteranopia') {
+        images.forEach(img => img.classList.add('deuteranopia-filter'));
+    } else if (selectedValue === 'protanopia') {
+        images.forEach(img => img.classList.add('protanopia-filter'));
+    }
+    // If "default" is selected, no extra filter classes are applied.
+});
+
 </script>
 {% endblock %}
