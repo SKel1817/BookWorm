@@ -1,0 +1,61 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Install Docker Compose
+      run: |
+        sudo curl -L "https://github.com/docker/compose/releases/download/v2.26.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+        sudo chmod +x /usr/local/bin/docker-compose
+
+    - name: Prepare QEMU Environment
+      uses: docker/setup-qemu-action@v1
+
+    - name: Configure Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Authenticate Docker Hub
+      uses: docker/login-action@v1
+      with:
+        registry: docker.io
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Get version from app/params.json file
+      id: get_version
+      run: |
+        VERSION=$(jq -r '.VERSION' < app/params.json)
+        echo "version=$VERSION" >> $GITHUB_ENV
+
+    - name: Build and Push Image to Docker Hub
+      env:
+        FLASK_RUN_HOST: "0.0.0.0"
+        FLASK_RUN_PORT: "8080"
+        SECRET_KEY: "none"
+        GOOGLE_GEMINI_API_KEY: "none"
+        ENABLE_GEMINI_API: "false"
+        GEMINI_MODEL: "gemini-2.0-flash"
+      run: |
+        docker-compose -f docker-compose.yaml config > docker-stack.yml
+        docker buildx create --use
+        docker buildx build --push --platform linux/amd64,linux/arm64 \
+          --tag ${{ secrets.DOCKERHUB_USERNAME }}/bookworm:latest \
+          --tag ${{ secrets.DOCKERHUB_USERNAME }}/bookworm:stable \
+          --tag ${{ secrets.DOCKERHUB_USERNAME }}/bookworm:${{ env.version }} \
+          --file Dockerfile .
+
+    - name: Clean Up Environment
+      run: docker-compose down
