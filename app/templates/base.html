@@ -154,8 +154,7 @@
                     <button id="spacing-increase" class="p-2 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition" title="Increase spacing">
                         <i class="fas fa-expand-arrows-alt text-primary-600 dark:text-primary-300"></i>
                     </button>
-                    <button id="toggle-focus" class="p-2 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition" title="Focus mode">
-                        <i class="fas fa-leaf text-accent-600 dark:text-accent-400"></i>
+
                     </button>
                     <button id="chat-toggle" class="p-2 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition" title="Chat with Gemini">
                         <i class="fas fa-comment text-primary-600 dark:text-primary-300"></i>
@@ -214,9 +213,7 @@
                 <button id="mobile-read-aloud" class="p-1 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition">
                     <i class="fas fa-volume-up text-primary-600 dark:text-primary-300"></i>
                 </button>
-                <button id="mobile-toggle-focus" class="p-1 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition">
-                    <i class="fas fa-leaf text-accent-600 dark:text-accent-400"></i>
-                </button>
+
             </div>
 
             <!-- Mobile article title -->
@@ -239,6 +236,8 @@
         
         <!-- Footer -->
         <footer class="bg-[#f0ece5] dark:bg-[#292929] text-center p-4 text-sm text-primary-700 dark:text-primary-300">
+            {% block footer %}
+            {% endblock %}
             <p>&copy; 2025 BookWorm - Simplifying online reading</p>
         </footer>
     </div>
@@ -295,9 +294,7 @@
             document.getElementById('mobile-read-aloud').addEventListener('click', function() {
                 document.getElementById('read-aloud').click();
             });
-            document.getElementById('mobile-toggle-focus').addEventListener('click', function() {
-                document.getElementById('toggle-focus').click();
-            });
+
         });
     </script>
     <script>
