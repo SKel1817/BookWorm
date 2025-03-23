@@ -161,6 +161,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const gardenElements = document.getElementById('garden-elements');
     const fontColorDropdown = document.getElementById('font-color');
 
+    let evilModeActive = false;
     let currentFontSize = parseInt(window.getComputedStyle(readerContent).fontSize);
     let currentLineHeight = 1.6;
     let isAnnotationMode = false;
@@ -174,10 +175,30 @@ document.addEventListener('DOMContentLoaded', function() {
     let focusTimer = null;
     let drainTimer = null;
     let elapsedSeconds = 0; // Track seconds within the current minute
+    const evilModeToggle = document.getElementById('evil-mode-toggle');
     const COOKIE_CONSENT_NAME = 'bookworm_cookie_consent';
     const FOCUS_MINUTES_NAME = 'bookworm_focus_minutes';
     const GARDEN_PLANTS_NAME = 'bookworm_garden_plants';
     const PLANTS_PER_MINUTE = 1; // 1 plant per minute
+
+    // Toolbar modifications for evil mode
+    const toolbarButtons = document.querySelectorAll(
+        '#font-decrease, #font-increase, #read-aloud, #spacing-decrease, #spacing-increase, #highlight-toggle, #eraser-toggle, #chat-toggle, #magic-highlight'
+    );
+    const originalToolbarHTML = {};
+    toolbarButtons.forEach(btn => {
+        originalToolbarHTML[btn.id] = btn.innerHTML;
+    });
+    const fontFamilySelect = document.getElementById('font-family');
+    const originalFontFamilyOptions = fontFamilySelect ? fontFamilySelect.innerHTML : '';
+
+    // ------------------------------
+    // HELPER FUNCTIONS
+    // ------------------------------
+    // Reverse a string (for evil read-aloud)
+    function reverseText(text) {
+        return text.split('').reverse().join('');
+    }
 
     // ------------------------------
     // COOKIE FUNCTIONS & DATA LOADING
@@ -248,6 +269,54 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ------------------------------
+    // EVIL MODE TOGGLE & MODIFICATIONS
+    // ------------------------------
+    evilModeToggle.addEventListener('click', function() {
+        evilModeActive = !evilModeActive;
+        if (evilModeActive) {
+            activateEvilMode();
+        } else {
+            deactivateEvilMode();
+        }
+    });
+    
+    function activateEvilMode() {
+        // Replace toolbar buttons' content with an evil emoji
+        toolbarButtons.forEach(btn => {
+            const evilEmojis = ['😈', '👹', '👺', '💀', '👻', '👽', '🤖', '👾'];
+            const randomEmoji = evilEmojis[Math.floor(Math.random() * evilEmojis.length)];
+            btn.innerHTML = randomEmoji;
+        });
+        // Change the font-family dropdown to evil choices
+        if (fontFamilySelect) {
+            fontFamilySelect.innerHTML = `<option value="wingdings">Wingdings</option>`;
+        }
+        // Change the reader content to use a less readable font (e.g. Wingdings)
+        if (readerContent) {
+            readerContent.style.fontFamily = 'Wingdings, sans-serif';
+        }
+        // Additional evil modifications can be added here
+    }
+    
+    function deactivateEvilMode() {
+        // Restore original toolbar buttons
+        toolbarButtons.forEach(btn => {
+            if (originalToolbarHTML[btn.id]) {
+                btn.innerHTML = originalToolbarHTML[btn.id];
+            }
+        });
+        // Restore original font-family dropdown options
+        if (fontFamilySelect) {
+            fontFamilySelect.innerHTML = originalFontFamilyOptions;
+        }
+        // Restore the reader content font
+        if (readerContent) {
+            readerContent.style.fontFamily = '';
+        }
+        // Additional restoration code can be added here
+    }
+
+    // ------------------------------
     // FOCUS MODE FUNCTIONS
     // ------------------------------
     function startFocusMode() {
@@ -265,7 +334,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 saveFocusData();
             }
         }, 1000);
-        // Ensure the garden has the expected number of plants
         const expectedPlants = Math.floor(focusMinutes * PLANTS_PER_MINUTE);
         const currentPlants = document.querySelectorAll('.garden-plant').length;
         if (currentPlants < expectedPlants) {
@@ -369,11 +437,17 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!isReading) {
             isReading = true;
             readAloud.classList.add('bg-accent-200', 'dark:bg-accent-800');
-            const text = readerContent.innerText;
-            speechUtterance = new SpeechSynthesisUtterance(text);
+            const originalText = readerContent.innerText;
+            // If evil mode is active, reverse the text before speaking and lower the pitch
+            const textToSpeak = evilModeActive ? reverseText(originalText) : originalText;
+            speechUtterance = new SpeechSynthesisUtterance(textToSpeak);
+            if (evilModeActive) {
+            speechUtterance.pitch = 0.1; // Lower the pitch for evil mode
+            speechUtterance.rate = 1.2; // Increase the rate for evil mode
+            }
             speechUtterance.onend = () => {
-                isReading = false;
-                readAloud.classList.remove('bg-accent-200', 'dark:bg-accent-800');
+            isReading = false;
+            readAloud.classList.remove('bg-accent-200', 'dark:bg-accent-800');
             };
             speechSynthesis.speak(speechUtterance);
         } else {
@@ -387,11 +461,17 @@ document.addEventListener('DOMContentLoaded', function() {
             currentFontSize -= 1;
             readerContent.style.fontSize = currentFontSize + 'px';
         }
+        if (evilModeActive === true) {
+            readerContent.style.fontSize = '1px';
+        }
     });
     fontIncrease.addEventListener('click', () => {
         if (currentFontSize < 24) {
             currentFontSize += 1;
             readerContent.style.fontSize = currentFontSize + 'px';
+        }
+        if (evilModeActive === true) {
+            readerContent.style.fontSize = '300px';
         }
     });
     fontFamily.addEventListener('change', () => {
