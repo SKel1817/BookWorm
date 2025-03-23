@@ -172,7 +172,7 @@
                     </button>
 
                     </button>
-                    <button id="chat-toggle" class="p-2 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition" title="Ask questions">
+                    <button id="chat-toggle" class="p-2 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition" title="Chat with Gemini">
                         <i class="fas fa-comment text-primary-600 dark:text-primary-300"></i>
                     </button>
                     <!-- Button for Magic Highlights -->
@@ -268,7 +268,7 @@
     <!-- Add chat dialog -->
     <div id="chat-dialog" class="fixed bottom-4 right-4 bg-white dark:bg-[#333333] border border-primary-300 dark:border-primary-700 rounded-lg shadow-lg p-4 w-80 hidden">
         <div class="flex justify-between items-center mb-2">
-            <h2 class="text-lg font-bold text-primary-800 dark:text-primary-200">Ask Questions</h2>
+            <h2 class="text-lg font-bold text-primary-800 dark:text-primary-200">Chat with Gemini</h2>
             <button id="chat-close" class="text-primary-700 dark:text-primary-300 hover:text-primary-900 dark:hover:text-primary-100 transition">
                 <i class="fas fa-times"></i>
             </button>
@@ -369,7 +369,9 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ message })
+                    body: JSON.stringify({
+                        message: `${JSON.parse(localStorage.getItem('evilModeActive')) || false ? 'Please respond with as much sarcasm and capitalized phrases as possible: ' : 'Please respond to this message: '}${message}`
+                    })
                 })
                 .then(response => response.json())
                 .then(data => {
