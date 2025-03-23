@@ -3,30 +3,36 @@
 {% block title %}{{ title }} | BookWorm Reader{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto bg-white dark:bg-[#222222] rounded-lg shadow-lg mb-12 overflow-hidden">
+<div class="max-w-5xl mx-auto flex space-x-4">
     <!-- Reader Content as iframe-like container -->
-    <div id="reader-container" class="docs-container">
+    <div id="reader-container" class="docs-container flex-1">
         <div id="reader-content" class="docs-content">
             {{ content|safe }}
         </div>
     </div>
 
-    <!-- Cookie consent bar -->
-    <div id="cookie-consent"
-        class="fixed bottom-0 left-0 w-full bg-primary-100 dark:bg-primary-800 p-4 flex justify-between items-center shadow-lg z-50 hidden">
-        <div class="text-sm">
-            We use cookies to save your Focus Garden progress. This helps your plants grow across reading sessions.
-        </div>
-        <div class="flex space-x-2">
-            <button id="deny-cookies"
-                class="px-3 py-1 bg-white dark:bg-gray-700 text-primary-800 dark:text-primary-200 rounded text-sm">
-                No thanks
-            </button>
-            <button id="accept-cookies" class="px-3 py-1 bg-accent-600 dark:bg-accent-500 text-white rounded text-sm">
-                Accept
-            </button>
-        </div>
+    <!-- New Sidebar for Annotations -->
+    <div id="annotation-panel"
+        class="w-64 p-4 bg-gray-50 dark:bg-gray-800 bg-opacity-50 rounded-lg overflow-auto hidde"></div>
+    <!-- We'll append annotation boxes here via JavaScript -->
+</div>
+</div>
+<!-- Cookie consent bar -->
+<div id="cookie-consent"
+    class="fixed bottom-0 left-0 w-full bg-primary-100 dark:bg-primary-800 p-4 flex justify-between items-center shadow-lg z-50 hidden">
+    <div class="text-sm">
+        We use cookies to save your Focus Garden progress. This helps your plants grow across reading sessions.
     </div>
+    <div class="flex space-x-2">
+        <button id="deny-cookies"
+            class="px-3 py-1 bg-white dark:bg-gray-700 text-primary-800 dark:text-primary-200 rounded text-sm">
+            No thanks
+        </button>
+        <button id="accept-cookies" class="px-3 py-1 bg-accent-600 dark:bg-accent-500 text-white rounded text-sm">
+            Accept
+        </button>
+    </div>
+</div>
 </div>
 {% endblock %}
 
@@ -131,6 +137,32 @@
         max-width: 100%;
         height: auto;
         margin: 1em 0;
+    }
+
+    .annotation-box {
+        background-color: #fff;
+        border: 1px solid #ccc;
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+        border-radius: 4px;
+    }
+
+
+    .annotation-box textarea {
+        width: 100%;
+        height: 60px;
+        resize: vertical;
+        margin-bottom: 5px;
+    }
+
+    .annotation-actions {
+        text-align: right;
+    }
+
+    .annotation-actions button {
+        margin-left: 5px;
+        font-size: 0.85rem;
+        padding: 3px 6px;
     }
 
     /* Garden plant animations */
@@ -245,16 +277,6 @@
             localStorage.setItem('evilModeActive', JSON.stringify(evilModeActive));
         }
 
-        function getAnnotations() {
-            const annotations = [];
-            document.querySelectorAll('.annotation').forEach(annotation => {
-                annotations.push({
-                    text: annotation.dataset.text,
-                    note: annotation.querySelector('.annotation-note').value
-                });
-            });
-            return annotations;
-        }
 
         let currentFontSize = parseInt(window.getComputedStyle(readerContent).fontSize);
         let currentLineHeight = 1.6;
@@ -669,7 +691,7 @@
                         if (highlights) {
                             highlights.forEach(call => {
                                 const textToHighlight = call.match(/highlight\((.*?)\);/)[
-                                1];
+                                    1];
                                 highlightText(textToHighlight.replace(/['"]/g, ''));
                             });
                         }
@@ -819,45 +841,123 @@
             }
         });
 
-        function addAnnotation(text, note = '') {
-            console.log('Adding annotation for text:', text);
-            const content = readerContent.innerHTML;
-            const annotatedContent = content.replace(new RegExp(text, 'gi'), match =>
-                `<span class="bg-blue-300 annotation" data-text="${text}">${match}</span>`);
-            readerContent.innerHTML = annotatedContent;
-            const annotationElement = document.createElement('div');
-            annotationElement.className = 'annotation-box';
-            annotationElement.innerHTML = `
-            <textarea class="annotation-note">${note}</textarea>
-            <button class="delete-annotation">Delete</button>
-            <button class="edit-annotation">Edit</button>
-            <button class="save-annotation">Save</button>
-        `;
-            document.body.appendChild(annotationElement);
-            annotationElement.querySelector('.delete-annotation').addEventListener('click', function () {
-                annotationElement.remove();
-                removeAnnotation(text);
-                savePreferences();
-            });
-            annotationElement.querySelector('.edit-annotation').addEventListener('click', function () {
-                annotationElement.querySelector('.annotation-note').disabled = false;
-            });
-            annotationElement.querySelector('.save-annotation').addEventListener('click', function () {
-                annotationElement.querySelector('.annotation-note').disabled = true;
-                savePreferences();
-            });
-            savePreferences();
-        }
+// CREATE ANNOTATION
+// Optional third parameter "existingId": if provided, we use it rather than generating a new one.
+function addAnnotation(text, note = '', existingId) {
+    console.log('Adding annotation for text:', text);
 
-        function removeAnnotation(text) {
-            const content = readerContent.innerHTML;
-            const unannotatedContent = content.replace(
-                /<span class="bg-blue-300 annotation" data-text="(.*?)">(.*?)<\/span>/gi, (match, p1,
-                p2) => {
-                    return p1.includes(text) ? p2 : match;
-                });
-            readerContent.innerHTML = unannotatedContent;
+    // 1) Generate or re-use a unique ID for this annotation
+    const annotationId = existingId || ('annotation-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5));
+
+    // 2) Highlight the text in the article.
+    // We only replace the first occurrence not already wrapped.
+    const originalHTML = readerContent.innerHTML;
+    const safeText = text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // escape regex chars
+    let replaced = false;
+    const annotatedHTML = originalHTML.replace(new RegExp(safeText, 'gi'), function(match) {
+        if (!replaced) {
+            replaced = true;
+            return `<span class="bg-blue-300 annotation" data-id="${annotationId}" data-text="${text}">${match}</span>`;
         }
+        return match;
+    });
+    readerContent.innerHTML = annotatedHTML;
+
+    // 3) Ensure the sidebar is visible and relatively positioned.
+    const annotationPanel = document.getElementById('annotation-panel');
+    annotationPanel.classList.remove('hidden');
+    annotationPanel.style.position = 'relative';
+
+    // 4) Create the annotation box in the sidebar.
+    const annotationElement = document.createElement('div');
+    annotationElement.className = 'annotation-box p-2 bg-white dark:bg-[#333] shadow rounded';
+    annotationElement.style.position = 'absolute';
+    // Store unique ID and text for later reference.
+    annotationElement.dataset.id = annotationId;
+    annotationElement.dataset.text = text;
+
+    annotationElement.innerHTML = `
+      <div class="font-bold text-sm text-primary-700 dark:text-primary-300 mb-1">
+        Annotated text:
+      </div>
+      <div class="bg-gray-200 dark:bg-gray-700 p-1 rounded mb-2 text-sm">${text}</div>
+      <textarea class="annotation-note w-full h-16 p-2 border border-gray-300 rounded mb-2"
+                placeholder="Add a comment...">${note}</textarea>
+      <div class="flex justify-end space-x-2">
+        <button class="delete-annotation px-2 py-1 bg-red-500 text-white text-xs rounded">Delete</button>
+        <button class="edit-annotation px-2 py-1 bg-blue-500 text-white text-xs rounded">Edit</button>
+        <button class="save-annotation px-2 py-1 bg-green-500 text-white text-xs rounded">Save</button>
+      </div>
+    `;
+    annotationPanel.appendChild(annotationElement);
+
+    // 5) Position the annotation box in the sidebar
+    // Use the highlight span (found by its unique ID) to get the vertical offset.
+    const highlightSpan = document.querySelector(`span.annotation[data-id="${annotationId}"]`);
+    let offsetTop = 0;
+    if (highlightSpan) {
+        const highlightRect = highlightSpan.getBoundingClientRect();
+        const panelRect = annotationPanel.getBoundingClientRect();
+        offsetTop = (highlightRect.top + window.scrollY) - (panelRect.top + window.scrollY);
+        if (offsetTop < 0) offsetTop = 0;
+    }
+    annotationElement.style.top = offsetTop + 'px';
+    annotationElement.style.right = '0';
+
+    // 6) Initialize the note textarea as read-only by default.
+    const noteTextarea = annotationElement.querySelector('.annotation-note');
+    noteTextarea.disabled = true;
+
+    // 7) Wire up annotation actions.
+    annotationElement.querySelector('.delete-annotation').addEventListener('click', function () {
+        annotationElement.remove();
+        removeAnnotation(annotationId);
+        savePreferences();
+        // If no annotations remain, hide the sidebar.
+        if (annotationPanel.childElementCount === 0) {
+            annotationPanel.classList.add('hidden');
+        }
+    });
+    annotationElement.querySelector('.edit-annotation').addEventListener('click', function () {
+        noteTextarea.disabled = false;
+        noteTextarea.focus();
+    });
+    annotationElement.querySelector('.save-annotation').addEventListener('click', function () {
+        noteTextarea.disabled = true;
+        savePreferences();
+    });
+
+    // 8) Scroll the annotation panel so the new annotation is in view.
+    annotationElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    // 9) Persist changes (e.g., to localStorage).
+    savePreferences();
+}
+
+// REMOVE ANNOTATION (by unique ID)
+function removeAnnotation(annotationId) {
+    const content = readerContent.innerHTML;
+    const unannotatedContent = content.replace(
+        /<span class="bg-blue-300 annotation" data-id="(.*?)" data-text="(.*?)">(.*?)<\/span>/gi,
+        (match, p1, p2, p3) => p1 === annotationId ? p3 : match
+    );
+    readerContent.innerHTML = unannotatedContent;
+}
+
+// GET ALL ANNOTATIONS from the sidebar.
+function getAnnotations() {
+    const annotationBoxes = document.querySelectorAll('#annotation-panel .annotation-box');
+    const annotations = [];
+    annotationBoxes.forEach(box => {
+        const text = box.dataset.text;
+        const note = box.querySelector('.annotation-note').value;
+        const id = box.dataset.id;
+        annotations.push({ id, text, note });
+    });
+    return annotations;
+}
+
+
     });
     const colorBlindDropdown = document.getElementById('color-blind');
 
