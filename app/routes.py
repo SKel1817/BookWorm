@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import json
 import os
 import re
+from app.gemini import gemini_ai
 
 main_bp = Blueprint('main', __name__)
 
@@ -111,6 +112,8 @@ def settings():
         
         session['secret_key_verified'] = True
         google_gemini_key = request.form.get('google_gemini_key') or ''
+        enable_gemini = 'enable_gemini' in request.form
+        gemini_model = request.form.get('gemini_model') or 'gemini-1.0-pro'
         flask_port = request.form.get('flask_port') or '8080'
         
         # Update .env file
@@ -120,10 +123,20 @@ def settings():
             for line in lines:
                 if line.startswith('GOOGLE_GEMINI_API_KEY='):
                     file.write(f'GOOGLE_GEMINI_API_KEY={google_gemini_key}\n')
+                elif line.startswith('ENABLE_GEMINI_API='):
+                    file.write(f'ENABLE_GEMINI_API={"true" if enable_gemini else "false"}\n')
+                elif line.startswith('GEMINI_MODEL='):
+                    file.write(f'GEMINI_MODEL={gemini_model}\n')
                 elif line.startswith('FLASK_RUN_PORT='):
                     file.write(f'FLASK_RUN_PORT={flask_port}\n')
                 else:
                     file.write(line)
+        
+        # Re-initialize Gemini AI with new settings
+        os.environ['GOOGLE_GEMINI_API_KEY'] = google_gemini_key
+        os.environ['ENABLE_GEMINI_API'] = 'true' if enable_gemini else 'false'
+        os.environ['GEMINI_MODEL'] = gemini_model
+        gemini_ai._initialize()
         
         flash('Settings updated successfully', 'success')
         return redirect(url_for('main.settings'))
@@ -132,8 +145,16 @@ def settings():
         return render_template('settings.html', secret_key_verified=False)
     
     google_gemini_key = os.getenv('GOOGLE_GEMINI_API_KEY', '')
+    enable_gemini = os.getenv('ENABLE_GEMINI_API', 'false').lower() == 'true'
+    gemini_model = os.getenv('GEMINI_MODEL', 'gemini-1.0-pro')
     flask_port = os.getenv('FLASK_RUN_PORT', '8080')
-    return render_template('settings.html', secret_key_verified=True, google_gemini_key=google_gemini_key, flask_port=flask_port, secret_key=session.get('secret_key'))
+    return render_template('settings.html', 
+                           secret_key_verified=True, 
+                           google_gemini_key=google_gemini_key, 
+                           enable_gemini=enable_gemini,
+                           gemini_model=gemini_model,
+                           flask_port=flask_port, 
+                           secret_key=session.get('secret_key'))
 
 @main_bp.route('/json/version')
 def json_version():
@@ -169,3 +190,43 @@ def api_spacing():
 @main_bp.route('/api/annotation', methods=['POST'])
 def api_annotation():
     return jsonify({'status': 'success'})
+
+@main_bp.route('/api/chat', methods=['POST'])
+def api_chat():
+    """
+    Process messages through the Gemini API and return the response
+    
+    Required POST parameters:
+    - message: The user's message to process
+    
+    Optional POST parameters:
+    - context: Additional context to send to the model
+    """
+    if not gemini_ai.is_available():
+        return jsonify({
+            'success': False, 
+            'error': 'Gemini API is not enabled or properly configured'
+        }), 503
+    
+    message = request.json.get('message')
+    context = request.json.get('context')
+    
+    if not message:
+        return jsonify({
+            'success': False,
+            'error': 'Message parameter is required'
+        }), 400
+    
+    # Process the message with Gemini
+    response = gemini_ai.generate_response(message, context)
+    return jsonify(response)
+
+@main_bp.route('/api/chat/status', methods=['GET'])
+def api_chat_status():
+    """Return the current status of the Gemini API integration"""
+    return jsonify({
+        'enabled': gemini_ai.enabled,
+        'initialized': gemini_ai.initialized,
+        'available': gemini_ai.is_available(),
+        'model': gemini_ai.model
+    })

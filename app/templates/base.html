@@ -52,12 +52,52 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
     
+    <style>
+        /* Loading screen styles */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        #loading-icon {
+            font-size: 3rem;
+            animation: float 2s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        #loading-text {
+            font-size: 1.5rem;
+            margin-top: 1rem;
+            text-align: center;
+        }
+    </style>
+    
     {% block head %}{% endblock %}
 </head>
 <body class="min-h-screen bg-[#f8f5f0] dark:bg-[#1e1e1e] text-[#2d2d2d] dark:text-[#f0f0f0] transition-colors duration-300">
     <div class="flex flex-col min-h-screen">
         <!-- Navigation Bar -->
-        <nav class="p-4 bg-[#f0ece5] dark:bg-[#292929] shadow-md">
+        <nav class="p-4 bg-[#f0ece5] dark:bg-[#292929] shadow-md fixed top-0 left-0 w-full z-50">
             <div class="container mx-auto flex items-center justify-between">
                 <!-- Left side - Logo and article info -->
                 <div class="flex items-center space-x-4">
@@ -114,12 +154,25 @@
                     <button id="spacing-increase" class="p-2 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition" title="Increase spacing">
                         <i class="fas fa-expand-arrows-alt text-primary-600 dark:text-primary-300"></i>
                     </button>
-                    <button id="annotation-mode" class="p-2 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition" title="Annotation mode">
-                        <i class="fas fa-highlighter text-primary-600 dark:text-primary-300"></i>
-                    </button>
                     <button id="toggle-focus" class="p-2 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition" title="Focus mode">
                         <i class="fas fa-leaf text-accent-600 dark:text-accent-400"></i>
                     </button>
+                    <button id="chat-toggle" class="p-2 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition" title="Chat with Gemini">
+                        <i class="fas fa-comment text-primary-600 dark:text-primary-300"></i>
+                    </button>
+                    <!-- Button for Magic Highlights -->
+                    <button id="magic-highlight" class="p-2 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition" title="Magic Highlight">
+                        <i class="fas fa-magic text-primary-600 dark:text-primary-300"></i>
+                    </button>
+                    <div class="relative bg-[#333333] dark:bg-[#444444] bg-opacity-10 dark:bg-opacity-10 p-2 rounded-md shadow-lg">
+                        <div id="tool-selection" class="absolute top-0 left-0 w-full h-full border-2 border-accent-600 rounded-md transition-all duration-300" style="display: none;"></div>
+                        <button id="highlight-toggle" class="p-2 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition" title="Highlight text">
+                            <i class="fas fa-highlighter text-primary-600 dark:text-primary-300"></i>
+                        </button>
+                        <button id="eraser-toggle" class="p-2 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition" title="Remove highlights">
+                            <i class="fas fa-eraser text-primary-600 dark:text-primary-300"></i>
+                        </button>
+                    </div>
                 </div>
                 {% endif %}
                 
@@ -190,6 +243,37 @@
         </footer>
     </div>
     
+    <!-- Add chat dialog -->
+    <div id="chat-dialog" class="fixed bottom-4 right-4 bg-white dark:bg-[#333333] border border-primary-300 dark:border-primary-700 rounded-lg shadow-lg p-4 w-80 hidden">
+        <div class="flex justify-between items-center mb-2">
+            <h2 class="text-lg font-bold text-primary-800 dark:text-primary-200">Chat with Gemini</h2>
+            <button id="chat-close" class="text-primary-700 dark:text-primary-300 hover:text-primary-900 dark:hover:text-primary-100 transition">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="chat-messages" class="overflow-y-auto max-h-60 mb-2">
+            <!-- Chat messages will be appended here -->
+        </div>
+        <div class="flex items-center">
+            <input type="text" id="chat-input" class="flex-grow bg-white dark:bg-[#333333] border border-primary-300 dark:border-primary-700 rounded px-2 py-1 text-sm" placeholder="Type a message...">
+            <button id="chat-send" class="ml-2 p-2 rounded-md bg-primary-600 text-white hover:bg-primary-700 transition">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-md shadow-md hidden">
+        <p id="toast-message"></p>
+    </div>
+
+    <div id="loading-screen">
+        <div>
+            <i id="loading-icon" class="fas fa-search"></i>
+            <div id="loading-text">Loading...</div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="{{ url_for('static', filename='js/local.js') }}"></script>
     {% if request.endpoint == 'main.reader' %}
@@ -216,8 +300,182 @@
             });
         });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatToggle = document.getElementById('chat-toggle');
+            const chatDialog = document.getElementById('chat-dialog');
+            const chatClose = document.getElementById('chat-close');
+            const chatInput = document.getElementById('chat-input');
+            const chatSend = document.getElementById('chat-send');
+            const chatMessages = document.getElementById('chat-messages');
+
+            chatToggle.addEventListener('click', function() {
+                chatDialog.classList.toggle('hidden');
+            });
+
+            chatClose.addEventListener('click', function() {
+                chatDialog.classList.add('hidden');
+            });
+
+            chatSend.addEventListener('click', function() {
+                sendMessage();
+            });
+
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+
+            function sendMessage() {
+                const message = chatInput.value.trim();
+                if (!message) return;
+
+                // Append user message to chat
+                const userMessage = document.createElement('div');
+                userMessage.className = 'text-right mb-2';
+                userMessage.innerHTML = `<div class="inline-block bg-primary-100 dark:bg-primary-800 text-primary-800 dark:text-primary-200 rounded-lg px-3 py-2">${message}</div>`;
+                chatMessages.appendChild(userMessage);
+
+                // Clear input
+                chatInput.value = '';
+
+                // Scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                // Send message to Gemini API
+                fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const geminiMessage = document.createElement('div');
+                        geminiMessage.className = 'text-left mb-2';
+                        geminiMessage.innerHTML = `<div class="inline-block bg-primary-200 dark:bg-primary-700 text-primary-900 dark:text-primary-100 rounded-lg px-3 py-2">${data.response}</div>`;
+                        chatMessages.appendChild(geminiMessage);
+
+                        // Scroll to bottom
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    } else {
+                        showToast('Error: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    showToast('Error: ' + error.message);
+                });
+            }
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const highlightToggle = document.getElementById('highlight-toggle');
+            const eraserToggle = document.getElementById('eraser-toggle');
+            const toolSelection = document.getElementById('tool-selection');
+            let activeTool = null;
+
+            highlightToggle.addEventListener('click', function() {
+                setActiveTool('highlight', highlightToggle);
+            });
+
+            eraserToggle.addEventListener('click', function() {
+                setActiveTool('eraser', eraserToggle);
+            });
+
+            document.addEventListener('mouseup', function() {
+                const selectedText = window.getSelection().toString().trim();
+                if (activeTool === 'highlight' && selectedText) {
+                    highlightText(selectedText);
+                } else if (activeTool === 'eraser' && selectedText) {
+                    removeHighlight(selectedText);
+                }
+            });
+
+            function setActiveTool(tool, button) {
+                if (activeTool === tool) {
+                    activeTool = null;
+                    toolSelection.style.display = 'none';
+                } else {
+                    activeTool = tool;
+                    toolSelection.style.display = 'block';
+                    toolSelection.style.top = button.offsetTop + 'px';
+                    toolSelection.style.left = button.offsetLeft + 'px';
+                    toolSelection.style.width = button.offsetWidth + 'px';
+                    toolSelection.style.height = button.offsetHeight + 'px';
+                }
+                highlightToggle.classList.toggle('bg-primary-200', tool === 'highlight');
+                eraserToggle.classList.toggle('bg-primary-200', tool === 'eraser');
+                magicHighlight.classList.toggle('bg-primary-200', tool === 'magic');
+                document.body.style.cursor = tool === 'highlight' || tool === 'eraser' ? 'text' : 'default';
+            }
+
+            window.highlightText = function(text) {
+                const content = document.body.innerHTML;
+                const highlightedContent = content.replace(new RegExp(text, 'gi'), match => `<span class="bg-yellow-300">${match}</span>`);
+                document.body.innerHTML = highlightedContent;
+            }
+
+            window.removeHighlight = function(text) {
+                const content = document.body.innerHTML;
+                const unhighlightedContent = content.replace(new RegExp(`<span class="bg-yellow-300">(${text})</span>`, 'gi'), '$1');
+                document.body.innerHTML = unhighlightedContent;
+            }
+
+            window.magicHighlightText = function(text) {
+                const content = document.body.innerHTML;
+                const magicHighlightedContent = content.replace(new RegExp(text, 'gi'), match => `<span class="bg-purple-300">${match}</span>`);
+                document.body.innerHTML = magicHighlightedContent;
+            }
+        });
+    </script>
+    <script>
+        const loadingScreen = document.getElementById('loading-screen');
+        const loadingText = document.getElementById('loading-text');
+        const phrases = [
+            "Honking...", "Wrenching...", "Reading...", "Loading...", "Fetching...",
+            "Zooming...", "Bouncing...", "Whizzing...", "Zipping...", "Flying...",
+            "Dashing...", "Scooting...", "Gliding...", "Soaring...", "Sprinting...",
+            "Galloping...", "Leaping...", "Hopping...", "Skipping...", "Diving...",
+            "Surfing...", "Sailing...", "Paddling...", "Rowing...", "Swimming...",
+            "Jogging...", "Running...", "Cycling...", "Pedaling...", "Skating...",
+            "Sliding...", "Rolling...", "Spinning...", "Twisting...", "Turning..."];
+
+        function changePhrase() {
+            const randomIndex = Math.floor(Math.random() * phrases.length);
+            loadingText.textContent = phrases[randomIndex];
+        }
+
+        setInterval(changePhrase, Math.random() * 1400 + 100);
+
+        window.addEventListener('load', function() {
+            loadingScreen.style.display = 'none';
+        });
+    </script>
     {% endif %}
     
-    {% block scripts %}{% endblock %}
+    {% block scripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            toastMessage.textContent = "{{ message }}";
+            toast.classList.remove('hidden');
+            toast.classList.add('bg-' + (category == 'success' ? 'green' : 'red') + '-500');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+        });
+    </script>
+    {% endblock %}
 </body>
 </html>
