@@ -49,13 +49,11 @@ def extract_main_content(soup):
     # Remove unwanted elements
     for element in soup.find_all(['script', 'style', 'nav', 'header', 'footer', 'aside']):
         element.extract()
-    
+        
     # Try to find the main content container
     main_content = None
-    
     # Look for common content container elements with highest priority
     content_containers = soup.find_all(['article', 'main', '[role="main"]', '.content', '#content', '.post', '.entry'])
-    
     if content_containers:
         # Choose the container with the most paragraphs
         main_content = max(content_containers, key=lambda x: len(x.find_all('p')))
@@ -64,11 +62,11 @@ def extract_main_content(soup):
         divs = soup.find_all('div')
         if divs:
             main_content = max(divs, key=lambda x: len(x.find_all('p')))
-    
+            
     # If still no content found, use the body
     if not main_content or len(main_content.find_all('p')) < 2:
         main_content = soup.body
-    
+        
     # Format content for display in the reader
     formatted_content = ""
     
@@ -93,13 +91,23 @@ def extract_main_content(soup):
                 formatted_content += f'<img src="{img_src}" alt="{element.get("alt", "")}" />'
                 continue
                 
-            # Add the element as-is
-            formatted_content += str(element)
-    
+            # Remove all links and spans with hrefs inside the element while preserving their text
+            replacements = {}
+            for link in element.find_all(['a', 'span']):
+                print("Link found:", link)
+                if link.has_attr('href'):
+                    replacements[link] = link.get_text()
+            candidate_text = str(element)
+            if len(replacements) > 0:
+                for link, text in replacements.items():
+                    candidate_text = candidate_text.replace(str(link), text)
+            # Add the element (now with links replaced by text)
+            formatted_content += candidate_text
+            
     # If we couldn't extract meaningful content, provide a fallback message
     if not formatted_content or len(formatted_content) < 100:
         formatted_content = "<p>Sorry, we couldn't extract meaningful content from this page. You can view the original source instead.</p>"
-    
+        
     return formatted_content
 
 @main_bp.route('/settings', methods=['GET', 'POST'])
@@ -170,27 +178,6 @@ def json_version():
 def favicon():
     return send_from_directory(os.path.join(main_bp.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
-# Stub endpoints for new toolbar buttons
-@main_bp.route('/api/font-size', methods=['POST'])
-def api_font_size():
-    return jsonify({'status': 'success'})
-
-@main_bp.route('/api/font-family', methods=['POST'])
-def api_font_family():
-    return jsonify({'status': 'success'})
-
-@main_bp.route('/api/read-aloud', methods=['POST'])
-def api_read_aloud():
-    return jsonify({'status': 'success'})
-
-@main_bp.route('/api/spacing', methods=['POST'])
-def api_spacing():
-    return jsonify({'status': 'success'})
-
-@main_bp.route('/api/annotation', methods=['POST'])
-def api_annotation():
-    return jsonify({'status': 'success'})
-
 @main_bp.route('/api/chat', methods=['POST'])
 def api_chat():
     """
@@ -210,6 +197,8 @@ def api_chat():
     
     message = request.json.get('message')
     context = request.json.get('context')
+
+    print("Asking Gemini:", message)
     
     if not message:
         return jsonify({

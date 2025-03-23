@@ -90,6 +90,23 @@
             margin-top: 1rem;
             text-align: center;
         }
+        .evil-mode-button:hover {
+        animation: shake 1s;
+        animation-iteration-count: 10;
+    }
+    @keyframes shake {
+        0% { transform: translate(1px, 1px) rotate(0deg); }
+        10% { transform: translate(-1px, -2px) rotate(-1deg); }
+        20% { transform: translate(-3px, 0px) rotate(1deg); }
+        30% { transform: translate(3px, 2px) rotate(0deg); }
+        40% { transform: translate(1px, -1px) rotate(1deg); }
+        50% { transform: translate(-1px, 2px) rotate(-1deg); }
+        60% { transform: translate(-3px, 1px) rotate(0deg); }
+        70% { transform: translate(3px, 1px) rotate(-1deg); }
+        80% { transform: translate(-1px, -1px) rotate(1deg); }
+        90% { transform: translate(1px, 2px) rotate(0deg); }
+        100% { transform: translate(1px, -2px) rotate(-1deg); }
+    }
     </style>
     
     {% block head %}{% endblock %}
@@ -102,8 +119,7 @@
                 <!-- Left side - Logo and article info -->
                 <div class="flex items-center space-x-4">
                     <a href="/" class="flex items-center text-xl font-bold text-primary-700 dark:text-primary-300">
-                        <i class="fas fa-book-reader mr-2"></i>
-                        <span>BookWorm</span>
+                        <img src="{{ url_for('static', filename='images/banner.png') }}" alt="BookWorm Logo" class="m-0" style="object-fit: fill; height: 24px;">
                     </a>
                     
                     <!-- Title and original source - only shown on reader page -->
@@ -207,7 +223,14 @@
                         <button id="eraser-toggle" class="p-2 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition" title="Remove highlights">
                             <i class="fas fa-eraser text-primary-600 dark:text-primary-300"></i>
                         </button>
+                        <button id="annotation-toggle" class="p-2 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition" title="Annotation mode">
+                            <i class="fas fa-sticky-note text-primary-600 dark:text-primary-300"></i>
+                        </button>
                     </div>
+                    <!-- evil mode button (funny button that makes the website terrible)-->
+                    <button id="evil-mode-toggle" class="evil-mode-button p-2 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition" title="Activate Evil Mode">
+                        <i class="fas fa-skull-crossbones text-primary-600 dark:text-primary-300"></i>
+                    </button>
                 </div>
                 {% endif %}
                 
@@ -297,7 +320,7 @@
             <!-- Chat messages will be appended here -->
         </div>
         <div class="flex items-center">
-            <input type="text" id="chat-input" class="flex-grow bg-white dark:bg-[#333333] border border-primary-300 dark:border-primary-700 rounded px-2 py-1 text-sm" placeholder="Type a message...">
+            <input type="text" id="chat-input" class="flex-grow bg-white dark:bg-[#333333] border border-primary-300 dark:border-primary-700 rounded px-2 py-1 text-sm" placeholder="Type a message to Google Gemini AI...">
             <button id="chat-send" class="ml-2 p-2 rounded-md bg-primary-600 text-white hover:bg-primary-700 transition">
                 <i class="fas fa-paper-plane"></i>
             </button>
@@ -389,7 +412,9 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ message })
+                    body: JSON.stringify({
+                        message: `${JSON.parse(localStorage.getItem('evilModeActive')) || false ? 'Please respond with as much sarcasm and capitalized phrases as possible: ' : 'Please respond to this message: '}${message}`
+                    })
                 })
                 .then(response => response.json())
                 .then(data => {
@@ -415,6 +440,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const highlightToggle = document.getElementById('highlight-toggle');
             const eraserToggle = document.getElementById('eraser-toggle');
+            const annotationToggle = document.getElementById('annotation-toggle');
             const toolSelection = document.getElementById('tool-selection');
             let activeTool = null;
 
@@ -426,12 +452,18 @@
                 setActiveTool('eraser', eraserToggle);
             });
 
+            annotationToggle.addEventListener('click', function() {
+                setActiveTool('annotation', annotationToggle);
+            });
+
             document.addEventListener('mouseup', function() {
                 const selectedText = window.getSelection().toString().trim();
                 if (activeTool === 'highlight' && selectedText) {
                     highlightText(selectedText);
                 } else if (activeTool === 'eraser' && selectedText) {
                     removeHighlight(selectedText);
+                } else if (activeTool === 'annotation' && selectedText) {
+                    annotateText(selectedText);
                 }
             });
 
@@ -449,26 +481,23 @@
                 }
                 highlightToggle.classList.toggle('bg-primary-200', tool === 'highlight');
                 eraserToggle.classList.toggle('bg-primary-200', tool === 'eraser');
-                document.body.style.cursor = tool === 'highlight' || tool === 'eraser' ? 'text' : 'default';
+                annotationToggle.classList.toggle('bg-primary-200', tool === 'annotation');
+                document.body.style.cursor = tool === 'highlight' || tool === 'eraser' || tool === 'annotation' ? 'text' : 'default';
             }
 
-            window.highlightText = function(text) {
-                const content = document.body.innerHTML;
-                const highlightedContent = content.replace(new RegExp(text, 'gi'), match => `<span class="bg-yellow-300">${match}</span>`);
-                document.body.innerHTML = highlightedContent;
-            }
+            // window.highlightText = function(text) {
+            //     console.log("Is this being called? Highlighting text: " + text);
+            //     const content = document.body.innerHTML;
+            //     const highlightedContent = content.replace(new RegExp(text, 'gi'), match => `<span class="bg-yellow-300">${match}</span>`);
+            //     document.body.innerHTML = highlightedContent;
+            // }
 
-            window.removeHighlight = function(text) {
-                const content = document.body.innerHTML;
-                const unhighlightedContent = content.replace(new RegExp(`<span class="bg-yellow-300">(${text})</span>`, 'gi'), '$1');
-                document.body.innerHTML = unhighlightedContent;
-            }
-
-            window.magicHighlightText = function(text) {
-                const content = document.body.innerHTML;
-                const magicHighlightedContent = content.replace(new RegExp(text, 'gi'), match => `<span class="bg-purple-300">${match}</span>`);
-                document.body.innerHTML = magicHighlightedContent;
-            }
+            // window.removeHighlight = function(text) {
+            //     console.log("Is this being called? Removing highlight for: " + text);
+            //     const content = document.body.innerHTML;
+            //     const unhighlightedContent = content.replace(new RegExp(`<span class="bg-yellow-300">(${text})</span>`, 'gi'), '$1');
+            //     document.body.innerHTML = unhighlightedContent;
+            // }
         });
     </script>
     <script>
