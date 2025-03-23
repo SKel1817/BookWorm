@@ -16,6 +16,7 @@
                 id="secret-key" 
                 name="secret_key" 
                 required 
+                value="{{ secret_key }}" 
                 class="mt-1 block w-full px-3 py-2 border border-primary-300 dark:border-primary-700 rounded-md shadow-sm focus:outline-none focus:ring-accent-500 focus:border-accent-500 sm:text-sm">
         </div>
         <div class="mt-6">
@@ -28,7 +29,7 @@
     </form>
     {% else %}
     <form action="/settings" method="post">
-        <input type="hidden" name="secret_key" value="{{ secret_key }}">
+        <input type="hidden" name="secret_key" value="{{ session.secret_key }}">
         <div class="mb-4">
             <h2 class="text-xl font-semibold text-primary-800 dark:text-primary-200 mb-2">Google Gemini Configuration</h2>
             <label for="google-gemini-key" class="block text-sm font-medium text-primary-700 dark:text-primary-300">Google Gemini API Key</label>
@@ -50,20 +51,7 @@
                     Enable Gemini AI Chat API
                 </label>
             </div>
-
-            <div class="mt-3">
-                <label for="gemini-model" class="block text-sm font-medium text-primary-700 dark:text-primary-300">Gemini Model</label>
-                <select 
-                    id="gemini-model" 
-                    name="gemini_model" 
-                    class="mt-1 block w-full px-3 py-2 border border-primary-300 dark:border-primary-700 rounded-md shadow-sm focus:outline-none focus:ring-accent-500 focus:border-accent-500 sm:text-sm">
-                    <option value="gemini-1.0-pro" {% if gemini_model == 'gemini-1.0-pro' %}selected{% endif %}>Gemini 1.0 Pro</option>
-                    <option value="gemini-1.0-pro-vision" {% if gemini_model == 'gemini-1.0-pro-vision' %}selected{% endif %}>Gemini 1.0 Pro Vision</option>
-                    <option value="gemini-1.5-pro" {% if gemini_model == 'gemini-1.5-pro' %}selected{% endif %}>Gemini 1.5 Pro</option>
-                </select>
-            </div>
-        </div>
-        
+        </div>    
         <div class="mb-4">
             <h2 class="text-xl font-semibold text-primary-800 dark:text-primary-200 mb-2">Flask Configuration</h2>
             <label for="flask-port" class="block text-sm font-medium text-primary-700 dark:text-primary-300">Flask Port</label>
@@ -86,3 +74,5 @@
     {% endif %}
 </div>
 {% endblock %}
+
+            

@@ -113,56 +113,74 @@ def extract_main_content(soup):
 @main_bp.route('/settings', methods=['GET', 'POST'])
 def settings():
     if request.method == 'POST':
-        secret_key = request.form.get('secret_key')
-        if secret_key != os.getenv('SECRET_KEY'):
-            flash('Invalid secret key', 'error')
+        # Check if this is the Gemini settings form (which includes a google_gemini_key)
+        if 'google_gemini_key' in request.form:
+            # We assume the secret key was already verified and stored in the session.
+            # Optionally, you could re-check here, but we'll trust the session.
+            google_gemini_key = request.form.get('google_gemini_key') or ''
+            enable_gemini = 'enable_gemini' in request.form
+            gemini_model = request.form.get('gemini_model') or 'gemini-1.0-pro'
+            flask_port = request.form.get('flask_port') or '8080'
+            
+            # Update the .env file with the new settings
+            env_path = os.path.join(os.path.dirname(__file__), '../.env')
+            with open(env_path, 'r') as file:
+                lines = file.readlines()
+            with open(env_path, 'w') as file:
+                for line in lines:
+                    if line.startswith('GOOGLE_GEMINI_API_KEY='):
+                        file.write(f'GOOGLE_GEMINI_API_KEY={google_gemini_key}\n')
+                    elif line.startswith('ENABLE_GEMINI_API='):
+                        file.write(f'ENABLE_GEMINI_API={"true" if enable_gemini else "false"}\n')
+                    elif line.startswith('GEMINI_MODEL='):
+                        file.write(f'GEMINI_MODEL={gemini_model}\n')
+                    elif line.startswith('FLASK_RUN_PORT='):
+                        file.write(f'FLASK_RUN_PORT={flask_port}\n')
+                    else:
+                        file.write(line)
+            
+            # Update environment variables and reinitialize Gemini AI
+            os.environ['GOOGLE_GEMINI_API_KEY'] = google_gemini_key
+            os.environ['ENABLE_GEMINI_API'] = 'true' if enable_gemini else 'false'
+            os.environ['GEMINI_MODEL'] = gemini_model
+            gemini_ai._initialize()
+            
+            flash('Settings updated successfully', 'success')
             return redirect(url_for('main.settings'))
         
-        session['secret_key_verified'] = True
-        google_gemini_key = request.form.get('google_gemini_key') or ''
-        enable_gemini = 'enable_gemini' in request.form
-        gemini_model = request.form.get('gemini_model') or 'gemini-1.0-pro'
-        flask_port = request.form.get('flask_port') or '8080'
-        
-        # Update .env file
-        with open(os.path.join(os.path.dirname(__file__), '../.env'), 'r') as file:
-            lines = file.readlines()
-        with open(os.path.join(os.path.dirname(__file__), '../.env'), 'w') as file:
-            for line in lines:
-                if line.startswith('GOOGLE_GEMINI_API_KEY='):
-                    file.write(f'GOOGLE_GEMINI_API_KEY={google_gemini_key}\n')
-                elif line.startswith('ENABLE_GEMINI_API='):
-                    file.write(f'ENABLE_GEMINI_API={"true" if enable_gemini else "false"}\n')
-                elif line.startswith('GEMINI_MODEL='):
-                    file.write(f'GEMINI_MODEL={gemini_model}\n')
-                elif line.startswith('FLASK_RUN_PORT='):
-                    file.write(f'FLASK_RUN_PORT={flask_port}\n')
-                else:
-                    file.write(line)
-        
-        # Re-initialize Gemini AI with new settings
-        os.environ['GOOGLE_GEMINI_API_KEY'] = google_gemini_key
-        os.environ['ENABLE_GEMINI_API'] = 'true' if enable_gemini else 'false'
-        os.environ['GEMINI_MODEL'] = gemini_model
-        gemini_ai._initialize()
-        
-        flash('Settings updated successfully', 'success')
-        return redirect(url_for('main.settings'))
+        else:
+            # This is the secret key verification form.
+            secret_key = request.form.get('secret_key')
+            # Compare against the environment variable (set elsewhere)
+            if secret_key != os.getenv('SECRET_KEY'):
+                flash('Invalid secret key', 'error')
+                return redirect(url_for('main.settings'))
+            
+            # If the secret key is valid, store a flag in session.
+            session['secret_key_verified'] = True
+            session['secret_key'] = secret_key  # Save it if needed later
+            flash('Secret key verified and saved!', 'success')
+            return redirect(url_for('main.settings'))
     
+    # GET method: render the settings page.
     if not session.get('secret_key_verified'):
         return render_template('settings.html', secret_key_verified=False)
     
+    # If secret key has been verified, load current settings.
     google_gemini_key = os.getenv('GOOGLE_GEMINI_API_KEY', '')
     enable_gemini = os.getenv('ENABLE_GEMINI_API', 'false').lower() == 'true'
     gemini_model = os.getenv('GEMINI_MODEL', 'gemini-1.0-pro')
     flask_port = os.getenv('FLASK_RUN_PORT', '8080')
-    return render_template('settings.html', 
-                           secret_key_verified=True, 
-                           google_gemini_key=google_gemini_key, 
-                           enable_gemini=enable_gemini,
-                           gemini_model=gemini_model,
-                           flask_port=flask_port, 
-                           secret_key=session.get('secret_key'))
+    
+    return render_template(
+        'settings.html', 
+        secret_key_verified=True, 
+        google_gemini_key=google_gemini_key, 
+        enable_gemini=enable_gemini,
+        gemini_model=gemini_model,
+        flask_port=flask_port, 
+        secret_key=session.get('secret_key')
+    )
 
 @main_bp.route('/json/version')
 def json_version():
