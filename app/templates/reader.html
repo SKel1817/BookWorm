@@ -612,20 +612,28 @@ document.addEventListener('DOMContentLoaded', function() {
   btnColorBlind.addEventListener('click', function() {
     containerColorBlind.classList.toggle('hidden');
   });
+  // Close dropdowns when clicking outside
+  document.addEventListener('click', function(event) {
+    if (!containerFontColor.contains(event.target) && !btnFontColor.contains(event.target)) {
+      containerFontColor.classList.add('hidden');
+    }
+    if (!containerFontFamily.contains(event.target) && !btnFontFamily.contains(event.target)) {
+      containerFontFamily.classList.add('hidden');
+    }
+    if (!containerColorBlind.contains(event.target) && !btnColorBlind.contains(event.target)) {
+      containerColorBlind.classList.add('hidden');
+    }
+  });
+
+  document.getElementById('font-color').addEventListener('change', function() {
+    containerFontColor.classList.add('hidden');
+  });
+  document.getElementById('font-family').addEventListener('change', function() {
+    containerFontFamily.classList.add('hidden');
+  });
+  document.getElementById('color-blind').addEventListener('change', function() {
+    containerColorBlind.classList.add('hidden');
+  });
 });
-document.getElementById('font-color').addEventListener('change', function() {
-  document.getElementById('dropdown-font-color').classList.add('hidden');
-});
-document.getElementById('font-family').addEventListener('change', function() {
-  document.getElementById('dropdown-font-family').classList.add('hidden');
-});
-document.getElementById('color-blind').addEventListener('change', function() {
-  document.getElementById('dropdown-color-blind').classList.add('hidden');
-});
-
-
-
-
-
 </script>
 {% endblock %}
