@@ -13,7 +13,7 @@
 
     <!-- New Sidebar for Annotations -->
     <div id="annotation-panel"
-        class="w-64 p-4 bg-gray-50 dark:bg-gray-800 bg-opacity-50 rounded-lg overflow-auto hidde"></div>
+        class="w-64 p-4 bg-gray-50 dark:bg-gray-800 bg-opacity-50 rounded-lg overflow-auto hidden"></div>
     <!-- We'll append annotation boxes here via JavaScript -->
 </div>
 </div>
@@ -57,13 +57,14 @@
 
         <!-- Mobile: h-64, Desktop: 16:9 ratio (needs aspect-ratio plugin or Tailwind 3) -->
         <div
-            class=" h-[1080px] bg-[url('/static/images/Day_BG.png')] dark:bg-[url('/static/images/Night_BG.png')] bg-cover bg-center rounded-lg overflow-hidden relative">
-            <div class="flex justify-center items-end h-full">
-                <div id="garden-elements" class="flex space-x-2 mb-2"></div>
-            </div>
-            <div class="absolute bottom-0 left-0 right-0 h-4 bg-accent-800 dark:bg-accent-900 opacity-30"></div>
+        class="h-64 w-full bg-[url('/static/images/Day_BG_long.png')] dark:bg-[url('/static/images/Night_BG_long.png')] bg-cover bg-center rounded-lg overflow-hidden relative"
+        style="background-size: contain; background-position: center; background-repeat: no-repeat;">
+        <div class="flex justify-center items-end h-full">
+            <div id="garden-elements" class="flex space-x-2 mb-2"></div>
         </div>
+        <div class="absolute bottom-0 left-0 right-0 h-4 bg-accent-800 dark:bg-accent-900 opacity-30"></div>
     </div>
+    
 </footer>
 
 {% endblock %}
@@ -1029,6 +1030,56 @@ function getAnnotations() {
         document.getElementById('color-blind').addEventListener('change', function () {
             containerColorBlind.classList.add('hidden');
         });
+        const geminiGenerate = document.getElementById('gemini-generate');
+const loadingScreen = document.getElementById('loading-screen');
+
+geminiGenerate.addEventListener('click', function () {
+    loadingScreen.style.display = 'flex';
+    // Get all images from the reader content
+    const images = document.querySelectorAll('#reader-content img');
+
+    images.forEach(img => {
+        // Avoid processing if a description already exists
+        if (img.nextElementSibling && img.nextElementSibling.classList.contains('image-description')) {
+            return;
+        }
+        const imageUrl = img.getAttribute('src');
+
+        fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: `You are an image captioning agent. For the image at URL: ${imageUrl}, please respond with an imageDescription(text) function call that includes a detailed description of the image. ONLY respond with the function call and nothing else.`
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            if (data.success) {
+                // Expecting a response like: imageDescription("A detailed description here")
+                const match = data.response.match(/imageDescription\((.*?)\)/);
+                if (match) {
+                    const description = match[1].replace(/['"]/g, '');
+                    const caption = document.createElement('div');
+                    caption.className = 'image-description text-sm text-gray-600 dark:text-gray-300 mt-1';
+                    caption.innerText = description;
+                    img.parentNode.insertBefore(caption, img.nextSibling);
+                }
+            } else {
+                showToast('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            showToast('Error: ' + error.message);
+        })
+        .finally(() => {
+            loadingScreen.style.display = 'none';
+        });
+    });
+});
+
     });
 </script>
 {% endblock %}
