@@ -6,7 +6,7 @@
     <title>{% block title %}BookWorm{% endblock %}</title>
     
     <!-- Favicon -->
-    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='../static/images/Logo.ico') }}" type="image/x-icon">
     
     <!-- Shadcn styles (mimicking Shadcn look with Tailwind) -->
     <script src="{{ url_for('static', filename='js/tailwind.js') }}"></script>
@@ -107,6 +107,9 @@
         90% { transform: translate(1px, 2px) rotate(0deg); }
         100% { transform: translate(1px, -2px) rotate(-1deg); }
     }
+    main {
+    margin-top: 88px; /* or however tall your navbar is */
+    }
     </style>
     
     {% block head %}{% endblock %}
@@ -119,7 +122,7 @@
                 <!-- Left side - Logo and article info -->
                 <div class="flex items-center space-x-4">
                     <a href="/" class="flex items-center text-xl font-bold text-primary-700 dark:text-primary-300">
-                        <img src="{{ url_for('static', filename='images/banner.png') }}" alt="BookWorm Logo" class="m-0" style="object-fit: fill; height: 24px;">
+                        <img src="{{ url_for('static', filename='images/Logo.png') }}" alt="BookWorm Logo" class="m-0" style="height: 40px; max-height: 100%;">
                     </a>
                     
                     <!-- Title and original source - only shown on reader page -->
