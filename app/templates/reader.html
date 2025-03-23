@@ -11,18 +11,33 @@
         </div>
     </div>
 
-    <!-- Focus Mode Garden (always visible now) -->
-    <div id="focus-garden" class="mt-0 pt-6 border-t border-gray-200 dark:border-gray-700">
+    <!-- Cookie consent bar -->
+    <div id="cookie-consent"
+         class="fixed bottom-0 left-0 w-full bg-primary-100 dark:bg-primary-800 p-4 flex justify-between items-center shadow-lg z-50 hidden">
+        <div class="text-sm">
+            We use cookies to save your Focus Garden progress. This helps your plants grow across reading sessions.
+        </div>
+        <div class="flex space-x-2">
+            <button id="deny-cookies"
+                    class="px-3 py-1 bg-white dark:bg-gray-700 text-primary-800 dark:text-primary-200 rounded text-sm">
+                No thanks
+            </button>
+            <button id="accept-cookies"
+                    class="px-3 py-1 bg-accent-600 dark:bg-accent-500 text-white rounded text-sm">
+                Accept
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+<!-- Focus Mode Garden (moved to footer) -->
+<footer class="mt-12 pt-6">
+    <div id="focus-garden">
         <h3 class="text-center text-lg font-medium mb-4 text-accent-600 dark:text-accent-400">
             <i class="fas fa-seedling mr-2"></i>Your Focus Garden
         </h3>
-        <div class="h-32 bg-[#f5f5f0] dark:bg-[#252520] rounded-lg overflow-hidden relative">
-            <div class="flex justify-center items-end h-full">
-                <!-- Placeholder for garden elements that will be added with JS -->
-                <div id="garden-elements" class="flex space-x-2 mb-2"></div>
-            </div>
-            <div class="absolute bottom-0 left-0 right-0 h-4 bg-accent-800 dark:bg-accent-900 opacity-30"></div>
-        </div>
         <div class="flex justify-between items-center mt-2 text-sm">
             <div>
                 <span id="focus-time">0</span> minutes of distraction-free reading
@@ -34,19 +49,15 @@
         <div class="mt-2 w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
             <div id="focus-progress" class="bg-accent-600 h-2.5 rounded-full" style="width: 0%"></div>
         </div>
+        <div class="h-32 bg-[#f5f5f0] dark:bg-[#252520] rounded-lg overflow-hidden relative">
+            <div class="flex justify-center items-end h-full">
+                <!-- Placeholder for garden elements that will be added with JS -->
+                <div id="garden-elements" class="flex space-x-2 mb-2"></div>
+            </div>
+            <div class="absolute bottom-0 left-0 right-0 h-4 bg-accent-800 dark:bg-accent-900 opacity-30"></div>
+        </div>
     </div>
-</div>
-
-<!-- Cookie consent bar -->
-<div id="cookie-consent" class="fixed bottom-0 left-0 w-full bg-primary-100 dark:bg-primary-800 p-4 flex justify-between items-center shadow-lg z-50 hidden">
-    <div class="text-sm">
-        We use cookies to save your Focus Garden progress. This helps your plants grow across reading sessions.
-    </div>
-    <div class="flex space-x-2">
-        <button id="deny-cookies" class="px-3 py-1 bg-white dark:bg-gray-700 text-primary-800 dark:text-primary-200 rounded text-sm">No thanks</button>
-        <button id="accept-cookies" class="px-3 py-1 bg-accent-600 dark:bg-accent-500 text-white rounded text-sm">Accept</button>
-    </div>
-</div>
+</footer>
 {% endblock %}
 
 {% block head %}
@@ -59,12 +70,10 @@
         overflow-y: auto;
         border: 1px solid #E0E0E0;
     }
-    
     .dark .docs-container {
         background-color: #2D2D2D;
         border-color: #444444;
     }
-    
     .docs-content {
         background-color: white;
         max-width: 850px;
@@ -77,88 +86,51 @@
         line-height: 1.6;
         font-size: 14px;
     }
-    
     .dark .docs-content {
         background-color: #333333;
         color: #E0E0E0;
         box-shadow: 0 1px 3px rgba(0,0,0,0.3);
     }
-    
     .docs-content h1, .docs-content h2, .docs-content h3 {
         margin-top: 1.5em;
         margin-bottom: 0.5em;
         font-weight: 400;
     }
-    
     .docs-content h1 {
         font-size: 2em;
     }
-    
     .docs-content h2 {
         font-size: 1.5em;
     }
-    
     .docs-content p {
         margin-bottom: 1em;
     }
-    
     .docs-content a {
         color: #1a73e8;
         text-decoration: none;
     }
-    
     .dark .docs-content a {
         color: #8ab4f8;
     }
-    
     .docs-content img {
         max-width: 100%;
         height: auto;
         margin: 1em 0;
     }
-    
-    /* Spacing for paragraphs - will be adjustable */
-    .docs-content p {
-        margin-bottom: 1em;
-    }
-    
-    /* Highlights for annotation mode */
-    .highlight {
-        background-color: rgba(255, 255, 0, 0.5);
-        cursor: pointer;
-    }
-    
-    @media (max-width: 768px) {
-        .docs-content {
-            padding: 30px;
-            margin: 20px auto;
-        }
-    }
-    
-    @media (max-width: 480px) {
-        .docs-content {
-            padding: 20px;
-            margin: 10px;
-        }
-    }
-
     /* Garden plant animations */
     @keyframes growPlant {
         0% { transform: scale(0.5); opacity: 0.5; }
         100% { transform: scale(1); opacity: 1; }
     }
-
     .garden-plant {
         animation: growPlant 1s ease-out forwards;
     }
-
     /* Focus draining animation */
     @keyframes pulse {
         0% { opacity: 0.7; }
         50% { opacity: 1; }
         100% { opacity: 0.7; }
     }
-
     #focus-draining {
         animation: pulse 2s infinite;
     }
@@ -168,13 +140,14 @@
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Font size controls
+    // ------------------------------
+    // ELEMENT REFERENCES & INITIAL STATE
+    // ------------------------------
+    const originalTitle = document.title;
     const readerContent = document.getElementById('reader-content');
     const fontDecrease = document.getElementById('font-decrease');
     const fontIncrease = document.getElementById('font-increase');
     const fontFamily = document.getElementById('font-family');
-    const toggleFocus = document.getElementById('toggle-focus');
-    const focusGarden = document.getElementById('focus-garden');
     const spacingDecrease = document.getElementById('spacing-decrease');
     const spacingIncrease = document.getElementById('spacing-increase');
     const annotationMode = document.getElementById('annotation-mode');
@@ -184,50 +157,62 @@ document.addEventListener('DOMContentLoaded', function() {
     const denyCookies = document.getElementById('deny-cookies');
     const focusDraining = document.getElementById('focus-draining');
     const focusProgress = document.getElementById('focus-progress');
-    
-    // Current font size in pixels
+    const focusTimeDisplay = document.getElementById('focus-time');
+    const gardenElements = document.getElementById('garden-elements');
+    const fontColorDropdown = document.getElementById('font-color');
+
+    let evilModeActive = false;
     let currentFontSize = parseInt(window.getComputedStyle(readerContent).fontSize);
     let currentLineHeight = 1.6;
     let isAnnotationMode = false;
     let isReading = false;
-    let speechSynthesis = window.speechSynthesis;
     let speechUtterance = null;
-    
-    // Cookie related variables
     let cookiesAccepted = false;
-    let focusModeActive = false;
+
+    // Focus mode variables
+    let focusModeActive = true; // Set true to start focus mode automatically
     let focusMinutes = 0;
-    let focusTimer;
-    let drainTimer;
-    const focusTimeDisplay = document.getElementById('focus-time');
-    const gardenElements = document.getElementById('garden-elements');
+    let focusTimer = null;
+    let drainTimer = null;
+    let elapsedSeconds = 0; // Track seconds within the current minute
+    const evilModeToggle = document.getElementById('evil-mode-toggle');
     const COOKIE_CONSENT_NAME = 'bookworm_cookie_consent';
     const FOCUS_MINUTES_NAME = 'bookworm_focus_minutes';
     const GARDEN_PLANTS_NAME = 'bookworm_garden_plants';
-    const PLANTS_PER_MINUTE = 1/5; // 1 plant per 5 minutes
+    const PLANTS_PER_MINUTE = 1; // 1 plant per minute
 
-    // Check for existing cookie consent
-    checkCookieConsent();
-    
-    // Load saved focus minutes and garden plants if cookies accepted
-    if (cookiesAccepted) {
-        loadFocusData();
+    // Toolbar modifications for evil mode
+    const toolbarButtons = document.querySelectorAll(
+        '#font-decrease, #font-increase, #read-aloud, #spacing-decrease, #spacing-increase, #highlight-toggle, #eraser-toggle, #chat-toggle, #magic-highlight'
+    );
+    const originalToolbarHTML = {};
+    toolbarButtons.forEach(btn => {
+        originalToolbarHTML[btn.id] = btn.innerHTML;
+    });
+    const fontFamilySelect = document.getElementById('font-family');
+    const originalFontFamilyOptions = fontFamilySelect ? fontFamilySelect.innerHTML : '';
+
+    // ------------------------------
+    // HELPER FUNCTIONS
+    // ------------------------------
+    // Reverse a string (for evil read-aloud)
+    function reverseText(text) {
+        return text.split('').reverse().join('');
     }
-    
-    // Cookie functions
+
+    // ------------------------------
+    // COOKIE FUNCTIONS & DATA LOADING
+    // ------------------------------
     function checkCookieConsent() {
         const consent = getCookie(COOKIE_CONSENT_NAME);
         if (consent === 'accepted') {
             cookiesAccepted = true;
         } else {
-            // Show cookie consent bar if no preference saved
             cookieConsent.classList.remove('hidden');
         }
     }
-    
     function setCookie(name, value, days) {
         if (!cookiesAccepted && name !== COOKIE_CONSENT_NAME) return;
-        
         let expires = '';
         if (days) {
             const date = new Date();
@@ -236,28 +221,22 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         document.cookie = name + '=' + encodeURIComponent(value) + expires + '; path=/';
     }
-    
     function getCookie(name) {
         const nameEQ = name + '=';
         const ca = document.cookie.split(';');
         for (let i = 0; i < ca.length; i++) {
-            let c = ca[i];
-            while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-            if (c.indexOf(nameEQ) === 0) return decodeURIComponent(c.substring(nameEQ.length, c.length));
+            let c = ca[i].trim();
+            if (c.indexOf(nameEQ) === 0) return decodeURIComponent(c.substring(nameEQ.length));
         }
         return null;
     }
-    
     function loadFocusData() {
-        // Load focus minutes
         const savedMinutes = getCookie(FOCUS_MINUTES_NAME);
         if (savedMinutes) {
             focusMinutes = parseInt(savedMinutes);
             focusTimeDisplay.textContent = focusMinutes;
-            updateProgressBar();
+            updateProgressBar(0);
         }
-        
-        // Load garden plants
         const savedPlants = getCookie(GARDEN_PLANTS_NAME);
         if (savedPlants) {
             try {
@@ -270,331 +249,201 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
-    
     function saveFocusData() {
         if (cookiesAccepted) {
             setCookie(FOCUS_MINUTES_NAME, focusMinutes.toString(), 365);
-            
-            // Save garden plants data
             const plants = [];
             document.querySelectorAll('.garden-plant').forEach(plant => {
                 const icon = plant.querySelector('i').className;
                 const height = plant.querySelector('i').style.fontSize;
-                const plantData = {
-                    icon: icon,
-                    height: height,
-                    color: icon.match(/text-[a-z]+-\d+/)[0] || ''
-                };
-                plants.push(plantData);
+                const match = icon.match(/text-[a-z]+-\d+/);
+                const colorClass = match ? match[0] : '';
+                plants.push({ icon, height, color: colorClass });
             });
-            
             setCookie(GARDEN_PLANTS_NAME, JSON.stringify(plants), 365);
         }
     }
-    
-    // Font size controls
-    fontDecrease.addEventListener('click', () => {
-        if (currentFontSize > 12) {
-            currentFontSize -= 1;
-            readerContent.style.fontSize = currentFontSize + 'px';
-        }
-    });
-    
-    fontIncrease.addEventListener('click', () => {
-        if (currentFontSize < 24) {
-            currentFontSize += 1;
-            readerContent.style.fontSize = currentFontSize + 'px';
-        }
-    });
-    
-    // Font family control
-    fontFamily.addEventListener('change', () => {
-        switch(fontFamily.value) {
-            case 'sans':
-                readerContent.style.fontFamily = 'Arial, ui-sans-serif, system-ui, sans-serif';
-                break;
-            case 'serif':
-                readerContent.style.fontFamily = 'Georgia, ui-serif, serif';
-                break;
-            case 'mono':
-                readerContent.style.fontFamily = 'Courier New, ui-monospace, monospace';
-                break;
-            case 'comic':
-                readerContent.style.fontFamily = 'Comic Sans MS, Comic Sans, cursive';
-                break;
-            case 'times':
-                readerContent.style.fontFamily = 'Times New Roman, ui-serif, serif';
-                break;
-            case 'verdana':
-                readerContent.style.fontFamily = 'Verdana, ui-sans-serif, system-ui, sans-serif';
-                break;
-            case 'lex':
-                readerContent.style.fontFamily = 'OpenDyslexic, ui-sans-serif, system-ui, sans-serif';
-                break;
-            
-        }
-    });
-    
-    // Spacing controls
-    spacingDecrease.addEventListener('click', () => {
-        if (currentLineHeight > 1.2) {
-            currentLineHeight -= 0.1;
-            readerContent.style.lineHeight = currentLineHeight;
-        }
-    });
-    
-    spacingIncrease.addEventListener('click', () => {
-        if (currentLineHeight < 2.5) {
-            currentLineHeight += 0.1;
-            readerContent.style.lineHeight = currentLineHeight;
-        }
-    });
-    
-    // Read aloud functionality
-    readAloud.addEventListener('click', () => {
-        if (!isReading) {
-            isReading = true;
-            readAloud.classList.add('bg-accent-200', 'dark:bg-accent-800');
-            
-            // Get all the text from the content
-            const text = readerContent.innerText;
-            
-            speechUtterance = new SpeechSynthesisUtterance(text);
-            speechUtterance.onend = function() {
-                isReading = false;
-                readAloud.classList.remove('bg-accent-200', 'dark:bg-accent-800');
-            };
-            
-            speechSynthesis.speak(speechUtterance);
+    checkCookieConsent();
+    if (cookiesAccepted) {
+        loadFocusData();
+    }
+
+    // ------------------------------
+    // EVIL MODE TOGGLE & MODIFICATIONS
+    // ------------------------------
+    evilModeToggle.addEventListener('click', function() {
+        evilModeActive = !evilModeActive;
+        if (evilModeActive) {
+            activateEvilMode();
         } else {
-            isReading = false;
-            readAloud.classList.remove('bg-accent-200', 'dark:bg-accent-800');
-            speechSynthesis.cancel();
+            deactivateEvilMode();
         }
     });
     
-    // Focus mode toggle
-    toggleFocus.addEventListener('click', () => {
-        focusModeActive = !focusModeActive;
-        
-        if (focusModeActive) {
-            toggleFocus.classList.add('bg-accent-200', 'dark:bg-accent-800');
-            startFocusMode();
-        } else {
-            toggleFocus.classList.remove('bg-accent-200', 'dark:bg-accent-800');
-            stopFocusMode();
+    function activateEvilMode() {
+        // Replace toolbar buttons' content with an evil emoji
+        toolbarButtons.forEach(btn => {
+            const evilEmojis = ['😈', '👹', '👺', '💀', '👻', '👽', '🤖', '👾'];
+            const randomEmoji = evilEmojis[Math.floor(Math.random() * evilEmojis.length)];
+            btn.innerHTML = randomEmoji;
+        });
+        // Change the font-family dropdown to evil choices
+        if (fontFamilySelect) {
+            fontFamilySelect.innerHTML = `<option value="wingdings">Wingdings</option>`;
         }
-    });
+        // Change the reader content to use a less readable font (e.g. Wingdings)
+        if (readerContent) {
+            readerContent.style.fontFamily = 'Wingdings, sans-serif';
+        }
+        // Additional evil modifications can be added here
+    }
     
+    function deactivateEvilMode() {
+        // Restore original toolbar buttons
+        toolbarButtons.forEach(btn => {
+            if (originalToolbarHTML[btn.id]) {
+                btn.innerHTML = originalToolbarHTML[btn.id];
+            }
+        });
+        // Restore original font-family dropdown options
+        if (fontFamilySelect) {
+            fontFamilySelect.innerHTML = originalFontFamilyOptions;
+        }
+        // Restore the reader content font
+        if (readerContent) {
+            readerContent.style.fontFamily = '';
+        }
+        // Additional restoration code can be added here
+    }
+
+    // ------------------------------
+    // FOCUS MODE FUNCTIONS
+    // ------------------------------
     function startFocusMode() {
-        // Start focus timer
+        console.log("DEBUG: Starting focus mode, current focus minutes:", focusMinutes);
+        elapsedSeconds = 0;
         focusTimer = setInterval(() => {
-            focusMinutes++;
-            focusTimeDisplay.textContent = focusMinutes;
-            updateProgressBar();
-            
-            // Add a plant element every 5 minutes
-            if (focusMinutes % 5 === 0) {
+            elapsedSeconds++;
+            updateProgressBar(elapsedSeconds);
+            if (elapsedSeconds >= 60) {
+                focusMinutes++;
+                elapsedSeconds = 0;
+                focusTimeDisplay.textContent = focusMinutes;
+                console.log("DEBUG: Focus minute incremented to:", focusMinutes);
                 addRandomGardenElement();
                 saveFocusData();
             }
-        }, 60000); // 60000ms = 1 minute
-        
-        // If we have less than the expected number of plants, add one
+        }, 1000);
         const expectedPlants = Math.floor(focusMinutes * PLANTS_PER_MINUTE);
         const currentPlants = document.querySelectorAll('.garden-plant').length;
-        
         if (currentPlants < expectedPlants) {
             addRandomGardenElement();
         }
     }
-    
-    function stopFocusMode() {
-        // Stop focus timer
-        clearInterval(focusTimer);
-        saveFocusData();
-    }
-    
-    function updateProgressBar() {
-        // Calculate progress based on 5-minute increments
-        const nextMilestone = Math.ceil(focusMinutes / 5) * 5;
-        const prevMilestone = nextMilestone - 5;
-        const progress = ((focusMinutes - prevMilestone) / (nextMilestone - prevMilestone)) * 100;
+    function updateProgressBar(seconds) {
+        const progress = (seconds / 60) * 100;
         focusProgress.style.width = `${progress}%`;
     }
-    
     function addRandomGardenElement() {
-        // Different types of plants (just using different icons and colors for now)
+        console.log("DEBUG: Adding random garden element.");
         const plantTypes = [
             { icon: 'fa-seedling', height: '30px', color: 'text-accent-500' },
             { icon: 'fa-leaf', height: '40px', color: 'text-accent-600' },
             { icon: 'fa-tree', height: '50px', color: 'text-accent-700' },
             { icon: 'fa-pagelines', height: '45px', color: 'text-accent-500' }
         ];
-        
         const randomPlant = plantTypes[Math.floor(Math.random() * plantTypes.length)];
         addGardenElement(randomPlant.icon, randomPlant.height, randomPlant.color);
     }
-    
-    function addGardenElement(icon = 'fa-seedling', height = '30px', color = 'text-accent-500') {
+    function addGardenElement(icon, height, color) {
+        console.log("DEBUG: Adding garden element with icon:", icon, "height:", height, "color:", color);
         const element = document.createElement('div');
         element.className = 'garden-plant';
-        
+        element.style.position = 'absolute';
+        const containerBox = gardenElements.closest('.relative');
+        if (containerBox) {
+            const containerWidth = containerBox.offsetWidth;
+            const containerHeight = containerBox.offsetHeight;
+            const randomTop = containerHeight - 60;
+            let randomLeft;
+            let overlap;
+            do {
+                randomLeft = Math.random() * (containerWidth - 40);
+                overlap = Array.from(gardenElements.children).some(existingElement => {
+                    const existingRect = existingElement.getBoundingClientRect();
+                    const newRect = {
+                        left: randomLeft,
+                        top: randomTop,
+                        right: randomLeft + 40,
+                        bottom: randomTop + 40
+                    };
+                    return !(newRect.right < existingRect.left ||
+                             newRect.left > existingRect.right ||
+                             newRect.bottom < existingRect.top ||
+                             newRect.top > existingRect.bottom);
+                });
+            } while (overlap);
+            element.style.left = randomLeft + 'px';
+            element.style.top = randomTop + 'px';
+            console.log("DEBUG: Plant positioned at:", randomLeft, randomTop);
+        }
         element.innerHTML = `<i class="fas ${icon} ${color}" style="font-size: ${height}"></i>`;
         gardenElements.appendChild(element);
     }
-    
-    // Tab visibility detection for focus draining
-    document.addEventListener('visibilitychange', function() {
+    function startFocusDraining() {
+        console.log("DEBUG: Starting focus draining.");
+        clearInterval(focusTimer);
+        focusTimer = null;
+        focusDraining.classList.remove('hidden');
+        document.title = '⚠️ Focus Draining';
+        drainTimer = setInterval(() => {
+            console.log("DEBUG: Draining focus minute. Current focus minutes:", focusMinutes);
+            if (focusMinutes > 0) {
+                focusMinutes--;
+                focusTimeDisplay.textContent = focusMinutes;
+                updateProgressBar(0);
+                saveFocusData();
+                if (gardenElements.children.length > 0) {
+                    console.log("DEBUG: Removing a garden element due to focus drain.");
+                    gardenElements.removeChild(gardenElements.lastChild);
+                }
+            }
+        }, 30000);
+    }
+    function stopFocusDraining() {
+        console.log("DEBUG: Stopping focus draining.");
+        clearInterval(drainTimer);
+        drainTimer = null;
+        focusDraining.classList.add('hidden');
+        document.title = originalTitle;
+    }
+    document.addEventListener('visibilitychange', function () {
         if (document.hidden) {
-            // Tab not visible, start draining focus
             if (focusModeActive) {
                 startFocusDraining();
             }
         } else {
-            // Tab visible again, stop draining focus
             stopFocusDraining();
-            
-            // If focus mode is active, make sure the timer is running
             if (focusModeActive && !focusTimer) {
                 startFocusMode();
             }
         }
     });
-    
-    function startFocusDraining() {
-        // Clear the focus timer
-        clearInterval(focusTimer);
-        focusTimer = null;
-        
-        // Show draining indicator
-        focusDraining.classList.remove('hidden');
-        
-        // Set drain timer (drain 1 minute every 30 seconds)
-        drainTimer = setInterval(() => {
-            if (focusMinutes > 0) {
-                focusMinutes--;
-                focusTimeDisplay.textContent = focusMinutes;
-                updateProgressBar();
-                saveFocusData();
-                
-                // Remove a plant if we have one
-                if (gardenElements.children.length > 0 && focusMinutes % 5 === 0) {
-                    gardenElements.removeChild(gardenElements.lastChild);
-                }
-            }
-        }, 30000); // 30000ms = 30 seconds
-    }
-    
-    function stopFocusDraining() {
-        // Clear the drain timer
-        clearInterval(drainTimer);
-        
-        // Hide draining indicator
-        focusDraining.classList.add('hidden');
-    }
-    
-    // Cookie consent handlers
-    acceptCookies.addEventListener('click', () => {
-        cookiesAccepted = true;
-        setCookie(COOKIE_CONSENT_NAME, 'accepted', 365);
-        cookieConsent.classList.add('hidden');
-        saveFocusData();
-    });
-    
-    denyCookies.addEventListener('click', () => {
-        cookiesAccepted = false;
-        setCookie(COOKIE_CONSENT_NAME, 'declined', 365);
-        cookieConsent.classList.add('hidden');
-    });
-    
-    // Annotation mode functions
-    function enableAnnotationMode() {
-        const paragraphs = readerContent.querySelectorAll('p');
-        paragraphs.forEach(p => {
-            p.addEventListener('mouseup', highlightSelection);
-        });
-    }
-    
-    function disableAnnotationMode() {
-        const paragraphs = readerContent.querySelectorAll('p');
-        paragraphs.forEach(p => {
-            p.removeEventListener('mouseup', highlightSelection);
-        });
-    }
-    
-    function highlightSelection() {
-        if (!isAnnotationMode) return;
-        
-        const selection = window.getSelection();
-        if (selection.toString().length > 0) {
-            const range = selection.getRangeAt(0);
-            const span = document.createElement('span');
-            span.className = 'highlight';
-            
-            try {
-                range.surroundContents(span);
-                selection.removeAllRanges();
-            } catch(e) {
-                console.error("Could not highlight selection: ", e);
-            }
-        }
-    }
-  
-// Get the dropdown element for font color
-const fontColorDropdown = document.getElementById('font-color');
 
-fontColorDropdown.addEventListener('change', function() {
-    // Get the selected value
-    const selectedColor = this.value;
-    // Get the element containing the article text
-    const readerContent = document.getElementById('reader-content');
-    
-    // Change the text color based on selection
-    switch(selectedColor) {
-        case 'red':
-            readerContent.style.color = 'red';
-            break;
-        case 'blue':
-            readerContent.style.color = 'blue';
-            break;
-        case 'green':
-            readerContent.style.color = 'green';
-            break;
-        case 'yellow':
-            readerContent.style.color = 'yellow';
-            break;
-        case 'purple':
-            readerContent.style.color = 'purple';
-            break;
-        default:
-            // For default or any other unspecified value, remove inline color styling
-            readerContent.style.color = '';
-            break;
-    }
-});
-
-
-    const highlightToggle = document.getElementById('highlight-toggle');
-    const eraserToggle = document.getElementById('eraser-toggle');
-    let activeTool = null;
-
-    highlightToggle.addEventListener('click', function() {
-        setActiveTool('highlight');
-    });
-
-    eraserToggle.addEventListener('click', function() {
-        setActiveTool('eraser');
-    });
-
-    document.addEventListener('mouseup', function() {
-        const selectedText = window.getSelection().toString().trim();
-        if (activeTool === 'highlight' && selectedText) {
-            highlightText(selectedText);
-        } else if (activeTool === 'eraser' && selectedText) {
-            removeHighlight(selectedText);
-        }
-    });
+    // ------------------------------
+    // OTHER FUNCTIONALITY (Read Aloud, Font/Spacing, Annotation)
+    // ------------------------------
+    readAloud.addEventListener('click', () => {
+        if (!isReading) {
+            isReading = true;
+            readAloud.classList.add('bg-accent-200', 'dark:bg-accent-800');
+            const originalText = readerContent.innerText;
+            // If evil mode is active, reverse the text before speaking and lower the pitch
+            const textToSpeak = evilModeActive ? reverseText(originalText) : originalText;
+            speechUtterance = new SpeechSynthesisUtterance(textToSpeak);
+            if (evilModeActive) {
+            speechUtterance.pitch = 0.1; // Lower the pitch for evil mode
+            speechUtterance.rate = 1.2; // Increase the rate for evil mode
 
     function setActiveTool(tool) {
         activeTool = tool;
@@ -647,91 +496,141 @@ fontColorDropdown.addEventListener('change', function() {
             } else {
             showToast('Error: ' + data.error);
             }
-        })
-        .catch(error => {
-            showToast('Error: ' + error.message);
-        })
-        .finally(() => {
-            loadingScreen.style.display = 'none';
-        });
+            speechUtterance.onend = () => {
+            isReading = false;
+            readAloud.classList.remove('bg-accent-200', 'dark:bg-accent-800');
+            };
+            speechSynthesis.speak(speechUtterance);
+        } else {
+            isReading = false;
+            readAloud.classList.remove('bg-accent-200', 'dark:bg-accent-800');
+            speechSynthesis.cancel();
+        }
     });
 
     fontDecrease.addEventListener('click', () => {
-        if (parseInt(readerContent.style.fontSize) > 12) {
-            readerContent.style.fontSize = (parseInt(readerContent.style.fontSize) - 1) + 'px';
+        if (currentFontSize > 12) {
+            currentFontSize -= 1;
+            readerContent.style.fontSize = currentFontSize + 'px';
             savePreferences();
         }
+        if (evilModeActive === true) {
+            readerContent.style.fontSize = '1px';
+        }
     });
-
     fontIncrease.addEventListener('click', () => {
-        if (parseInt(readerContent.style.fontSize) < 24) {
-            readerContent.style.fontSize = (parseInt(readerContent.style.fontSize) + 1) + 'px';
+        if (currentFontSize < 24) {
+            currentFontSize += 1;
+            readerContent.style.fontSize = currentFontSize + 'px';
             savePreferences();
         }
+        if (evilModeActive === true) {
+            readerContent.style.fontSize = '300px';
+        }
     });
-
     fontFamily.addEventListener('change', () => {
-        readerContent.style.fontFamily = fontFamily.value;
+        switch(fontFamily.value) {
+            case 'sans':
+                readerContent.style.fontFamily = 'Arial, ui-sans-serif, system-ui, sans-serif';
+                break;
+            case 'serif':
+                readerContent.style.fontFamily = 'Georgia, ui-serif, serif';
+                break;
+            case 'mono':
+                readerContent.style.fontFamily = 'Courier New, ui-monospace, monospace';
+                break;
+            case 'comic':
+                readerContent.style.fontFamily = 'Comic Sans MS, Comic Sans, cursive';
+                break;
+            case 'times':
+                readerContent.style.fontFamily = 'Times New Roman, ui-serif, serif';
+                break;
+            case 'verdana':
+                readerContent.style.fontFamily = 'Verdana, ui-sans-serif, system-ui, sans-serif';
+                break;
+            case 'lex':
+                readerContent.style.fontFamily = 'OpenDyslexic, ui-sans-serif, system-ui, sans-serif';
+                break;
+        }
         savePreferences();
     });
-
-    fontColorDropdown.addEventListener('change', () => {
-        readerContent.style.color = fontColorDropdown.value;
-        savePreferences();
-    });
-
     spacingDecrease.addEventListener('click', () => {
-        if (parseFloat(readerContent.style.lineHeight) > 1.2) {
-            readerContent.style.lineHeight = (parseFloat(readerContent.style.lineHeight) - 0.1).toString();
+        if (currentLineHeight > 1.2) {
+            currentLineHeight -= 0.1;
+            readerContent.style.lineHeight = currentLineHeight;
             savePreferences();
         }
     });
-
     spacingIncrease.addEventListener('click', () => {
-        if (parseFloat(readerContent.style.lineHeight) < 2.5) {
-            readerContent.style.lineHeight = (parseFloat(readerContent.style.lineHeight) + 0.1).toString();
+        if (currentLineHeight < 2.5) {
+            currentLineHeight += 0.1;
+            readerContent.style.lineHeight = currentLineHeight;
             savePreferences();
         }
     });
+    fontColorDropdown.addEventListener('change', function() {
+        const selectedColor = this.value;
+        switch(selectedColor) {
+            case 'red':
+                readerContent.style.color = 'red';
+                break;
+            case 'blue':
+                readerContent.style.color = 'blue';
+                break;
+            case 'green':
+                readerContent.style.color = 'green';
+                break;
+            case 'yellow':
+                readerContent.style.color = 'yellow';
+                break;
+            case 'purple':
+                readerContent.style.color = 'purple';
+                break;
+            default:
+                readerContent.style.color = '';
+                break;
+        }
+        savePreferences();
+    });
 
+    // Annotation mode and highlight/eraser tools
+    const highlightToggle = document.getElementById('highlight-toggle');
+    const eraserToggle = document.getElementById('eraser-toggle');
+    let activeTool = null;
     highlightToggle.addEventListener('click', function() {
         setActiveTool('highlight');
     });
-
     eraserToggle.addEventListener('click', function() {
         setActiveTool('eraser');
     });
-
     document.addEventListener('mouseup', function() {
         const selectedText = window.getSelection().toString().trim();
         if (activeTool === 'highlight' && selectedText) {
             highlightText(selectedText);
-            savePreferences();
         } else if (activeTool === 'eraser' && selectedText) {
             removeHighlight(selectedText);
-            savePreferences();
         }
     });
-
     function setActiveTool(tool) {
         activeTool = tool;
         highlightToggle.classList.toggle('bg-primary-200', tool === 'highlight');
         eraserToggle.classList.toggle('bg-primary-200', tool === 'eraser');
-        document.body.style.cursor = tool === 'highlight' || tool === 'eraser' ? 'text' : 'default';
+        document.body.style.cursor = (tool === 'highlight' || tool === 'eraser') ? 'text' : 'default';
     }
-
     window.highlightText = function(text) {
         const content = readerContent.innerHTML;
         const highlightedContent = content.replace(new RegExp(text, 'gi'), match => `<span class="bg-yellow-300">${match}</span>`);
         readerContent.innerHTML = highlightedContent;
+        savePreferences();
     }
-
     window.removeHighlight = function(text) {
         const content = readerContent.innerHTML;
         const unhighlightedContent = content.replace(/<span class="bg-yellow-300">(.*?)<\/span>/gi, (match, p1) => {
             return p1.includes(text) ? p1 : match;
         });
         readerContent.innerHTML = unhighlightedContent;
+        savePreferences();
+    };
     }
 });
 </script>
@@ -750,53 +649,6 @@ document.addEventListener('DOMContentLoaded', function() {
     let activeTool = null;
     const url = '{{ url }}';
 
-    // Load saved articles from local storage
-    const savedArticles = JSON.parse(localStorage.getItem('savedArticles')) || [];
-    const articlePreferences = savedArticles.find(article => article.url === url) || {};
-    if (articlePreferences.fontSize) {
-        readerContent.style.fontSize = articlePreferences.fontSize;
-    }
-    if (articlePreferences.fontFamily) {
-        readerContent.style.fontFamily = articlePreferences.fontFamily;
-        fontFamily.value = articlePreferences.fontFamily;
-    }
-    if (articlePreferences.fontColor) {
-        readerContent.style.color = articlePreferences.fontColor;
-        fontColorDropdown.value = articlePreferences.fontColor;
-    }
-    if (articlePreferences.lineHeight) {
-        readerContent.style.lineHeight = articlePreferences.lineHeight;
-    }
-    if (articlePreferences.highlights) {
-        readerContent.innerHTML = articlePreferences.highlights;
-    }
-    if (articlePreferences.annotations) {
-        articlePreferences.annotations.forEach(annotation => {
-            addAnnotation(annotation.text, annotation.note);
-        });
-    }
-
-    // Save preferences to local storage
-    function savePreferences() {
-        const preferences = {
-            url: url,
-            title: '{{ title }}',
-            fontSize: readerContent.style.fontSize,
-            fontFamily: readerContent.style.fontFamily,
-            fontColor: readerContent.style.color,
-            lineHeight: readerContent.style.lineHeight,
-            highlights: readerContent.innerHTML,
-            annotations: getAnnotations()
-        };
-        const index = savedArticles.findIndex(article => article.url === url);
-        if (index !== -1) {
-            savedArticles[index] = preferences;
-        } else {
-            savedArticles.push(preferences);
-        }
-        localStorage.setItem('savedArticles', JSON.stringify(savedArticles));
-    }
-
     function getAnnotations() {
         const annotations = [];
         document.querySelectorAll('.annotation').forEach(annotation => {
@@ -807,44 +659,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         return annotations;
     }
-
-    fontDecrease.addEventListener('click', () => {
-        if (parseInt(readerContent.style.fontSize) > 12) {
-            readerContent.style.fontSize = (parseInt(readerContent.style.fontSize) - 1) + 'px';
-            savePreferences();
-        }
-    });
-
-    fontIncrease.addEventListener('click', () => {
-        if (parseInt(readerContent.style.fontSize) < 24) {
-            readerContent.style.fontSize = (parseInt(readerContent.style.fontSize) + 1) + 'px';
-            savePreferences();
-        }
-    });
-
-    fontFamily.addEventListener('change', () => {
-        readerContent.style.fontFamily = fontFamily.value;
-        savePreferences();
-    });
-
-    fontColorDropdown.addEventListener('change', () => {
-        readerContent.style.color = fontColorDropdown.value;
-        savePreferences();
-    });
-
-    spacingDecrease.addEventListener('click', () => {
-        if (parseFloat(readerContent.style.lineHeight) > 1.2) {
-            readerContent.style.lineHeight = (parseFloat(readerContent.style.lineHeight) - 0.1).toString();
-            savePreferences();
-        }
-    });
-
-    spacingIncrease.addEventListener('click', () => {
-        if (parseFloat(readerContent.style.lineHeight) < 2.5) {
-            readerContent.style.lineHeight = (parseFloat(readerContent.style.lineHeight) + 0.1).toString();
-            savePreferences();
-        }
-    });
+  
+    // ------------------------------
+    // START FOCUS MODE IF ACTIVE
+    // ------------------------------
+    if (focusModeActive) {
+        console.log("DEBUG: Page loaded and focus mode active. Starting focus mode.");
+        startFocusMode();
 
     highlightToggle.addEventListener('click', function() {
         setActiveTool('highlight');
