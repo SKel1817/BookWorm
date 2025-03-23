@@ -33,21 +33,53 @@ BookWorm is an innovative Flask-based web application created during the GrizzHa
 ### 🔊 **Read Aloud**
 - Listen to your articles with built-in text-to-speech support, increasing accessibility and convenience.
 
-### 📌 **Bookmarking & Saved Articles**
-- Easily bookmark and revisit your favorite articles anytime.
+### 📌 **Saving & Loading Articles**
+- Easily save and revisit your favorite articles anytime.
 
 ### 😈 **Evil Mode**
 - Activate a playful twist with reversed text and a whimsical interface, designed purely for fun!
 
-### 🍪 **Cookie Consent Management**
-- Seamlessly handles cookie consent, respecting user privacy and preferences.
+---
+
+## 🐳 Docker Setup
+
+BookWorm is conveniently packaged in Docker for effortless deployment:
+
+### **Docker Hub**
+The official Docker image is hosted on Docker Hub under `mwcurtis20/bookworm`. Tags include:
+- `latest`: Most recent build
+- `stable`: Most recent stable release
+- Specific version tags based on application releases
+
+Pull the image easily:
+```bash
+docker pull mwcurtis20/bookworm:stable
+```
+
+### **Docker Compose & Watchtower**
+- Deploy using Docker Compose provided (`docker-compose.yaml`).
+- Automated deployment and updates are powered by [Watchtower](https://github.com/containrrr/watchtower), ensuring the application is always up-to-date without manual intervention.
+
+Run deployment:
+```bash
+docker-compose up -d
+```
+
+---
+
+## 🔄 Continuous Integration (CI/CD)
+
+Our project utilizes GitHub Actions for automated builds and deployments:
+- **Multi-Architecture Builds:** Automatically builds Docker images for AMD64 and ARM64.
+- **Automated Deployment:** Images are automatically pushed to Docker Hub upon successful builds on the `main` branch.
+- **Version Tagging:** Images are tagged with `latest`, `stable`, and specific version numbers extracted from `app/params.json`.
 
 ---
 
 ## 🛠️ Tech Stack
 - **Languages:** Python, JavaScript
 - **Frameworks:** Flask, Tailwind CSS
-- **Libraries:** Fontawesome, Shadcn UI, Rich
+- **Libraries:** Fontawesome, Rich
 - **Tools:** Docker, Conda, Waitress
 - **APIs:** Google Gemini API
 
@@ -59,7 +91,6 @@ BookWorm/
 ├── app/
 │   ├── static/         # CSS, JS, Images
 │   ├── templates/      # HTML views
-│   └── __pycache__/    # Compiled files
 ├── requirements.txt    # Dependencies
 ├── run.py              # Entry point
 ├── Dockerfile          # Docker setup
@@ -70,53 +101,7 @@ BookWorm/
 
 ## 🖥️ Installation & Setup
 
-### **Prerequisites**
-- Python 3.10+
-- Conda
-
-### **Setup Steps**
-
-1. **Clone Repository**
-   ```bash
-   git clone https://github.com/SKel1817/BookWorm.git
-   cd BookWorm
-   ```
-
-2. **Create & Activate Environment**
-   ```bash
-   conda create -n bookworm python=3.10
-   conda activate bookworm
-   ```
-
-3. **Install Dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Configure Environment Variables**
-   Create `.env` from `.env.example` and fill in:
-   ```env
-   SECRET_KEY=your_secret_key_here
-   GOOGLE_GEMINI_API_KEY=api_key_here
-   FLASK_RUN_HOST=0.0.0.0
-   FLASK_RUN_PORT=8080
-   ```
-
-5. **Run the Application**
-   ```bash
-   python run.py
-   ```
-   Open `http://127.0.0.1:8080` in your browser.
-
-### **Using Waitress (Production)**
-- Install Waitress:
-  ```bash
-  pip install waitress
-  ```
-- Start server:
-  ```bash
-  python run.py
-  ```
+See instructions above for Docker deployments or follow the manual development setup provided.
 
 ---
 
@@ -128,12 +113,8 @@ BookWorm/
 4. Enable **Focus Mode** to grow your virtual garden.
 5. Use annotation and highlight tools to engage actively.
 6. Enable **Magic Highlight** for instant insights.
-7. Bookmark articles for later revisits.
+7. Revisit articles for later revisits.
 
----
-
-## 🤝 Contributing
-We welcome contributions from everyone! See our [Contribution Guidelines](CONTRIBUTING.md).
 
 ---
 
@@ -143,4 +124,3 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) for deta
 ---
 
 © 2025 BookWorm - Reading online, reimagined for focus and accessibility
-
