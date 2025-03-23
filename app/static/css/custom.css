@@ -10,6 +10,27 @@ body {
     font-style: normal;
   }
 
+
+  /* For Deuteranomaly (reduced green sensitivity) */
+.deuteranomaly-filter {
+  filter: brightness(1.2) contrast(1.2) saturate(1.3);
+}
+
+/* For Protanomaly (reduced red sensitivity) */
+.protanomaly-filter {
+  filter: brightness(1.3) contrast(1.2) saturate(1.1);
+}
+
+/* For Protanopia (missing red cones) */
+.protanopia-filter {
+  filter: brightness(1.4) contrast(1.3) saturate(1.2) hue-rotate(10deg);
+}
+
+/* For Deuteranopia (missing green cones) */
+.deuteranopia-filter {
+  filter: brightness(1.4) contrast(1.3) saturate(1.2) hue-rotate(-10deg);
+}
+
 #saved-articles {
     display: flex;
     overflow-x: auto;
@@ -21,3 +42,4 @@ body {
     flex: 0 0 auto;
     width: calc(50% - 0.5rem); /* Adjust width to show 2 cards */
 }
+

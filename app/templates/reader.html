@@ -750,5 +750,76 @@ document.addEventListener('DOMContentLoaded', function() {
         readerContent.innerHTML = unannotatedContent;
     }
 });
+const colorBlindDropdown = document.getElementById('color-blind');
+
+colorBlindDropdown.addEventListener('change', function() {
+    const selectedValue = this.value;
+    // Get all images within the reader content container
+    const images = document.querySelectorAll('#reader-content img');
+
+    // Remove any previously applied filter classes from all images
+    images.forEach(img => {
+        img.classList.remove('deuteranomaly-filter', 'protanomaly-filter', 'deuteranopia-filter', 'protanopia-filter');
+    });
+
+    // Apply the appropriate filter based on the user's selection
+    if (selectedValue === 'deuteranomaly') {
+        images.forEach(img => img.classList.add('deuteranomaly-filter'));
+    } else if (selectedValue === 'protanomaly') {
+        images.forEach(img => img.classList.add('protanomaly-filter'));
+    } else if (selectedValue === 'deuteranopia') {
+        images.forEach(img => img.classList.add('deuteranopia-filter'));
+    } else if (selectedValue === 'protanopia') {
+        images.forEach(img => img.classList.add('protanopia-filter'));
+    }
+    // If "default" is selected, no extra filter classes are applied.
+});
+document.addEventListener('DOMContentLoaded', function() {
+  // Get button and container elements for each dropdown
+  const btnFontColor = document.getElementById('toggle-font-color');
+  const btnFontFamily = document.getElementById('toggle-font-family');
+  const btnColorBlind = document.getElementById('toggle-color-blind');
+
+  const containerFontColor = document.getElementById('dropdown-font-color');
+  const containerFontFamily = document.getElementById('dropdown-font-family');
+  const containerColorBlind = document.getElementById('dropdown-color-blind');
+
+  // Toggle font color dropdown
+  btnFontColor.addEventListener('click', function() {
+    containerFontColor.classList.toggle('hidden');
+  });
+
+  // Toggle font family dropdown
+  btnFontFamily.addEventListener('click', function() {
+    containerFontFamily.classList.toggle('hidden');
+  });
+
+  // Toggle color blindness dropdown
+  btnColorBlind.addEventListener('click', function() {
+    containerColorBlind.classList.toggle('hidden');
+  });
+  // Close dropdowns when clicking outside
+  document.addEventListener('click', function(event) {
+    if (!containerFontColor.contains(event.target) && !btnFontColor.contains(event.target)) {
+      containerFontColor.classList.add('hidden');
+    }
+    if (!containerFontFamily.contains(event.target) && !btnFontFamily.contains(event.target)) {
+      containerFontFamily.classList.add('hidden');
+    }
+    if (!containerColorBlind.contains(event.target) && !btnColorBlind.contains(event.target)) {
+      containerColorBlind.classList.add('hidden');
+    }
+  });
+
+  document.getElementById('font-color').addEventListener('change', function() {
+    containerFontColor.classList.add('hidden');
+  });
+  document.getElementById('font-family').addEventListener('change', function() {
+    containerFontFamily.classList.add('hidden');
+  });
+  document.getElementById('color-blind').addEventListener('change', function() {
+    containerColorBlind.classList.add('hidden');
+  });
+});
 </script>
 {% endblock %}

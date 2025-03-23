@@ -144,23 +144,59 @@
                     <button id="font-increase" class="p-2 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition" title="Increase font size">
                         <i class="fas fa-font text-lg text-primary-600 dark:text-primary-300"></i>
                     </button>
-                    <select id="font-color" class="bg-white dark:bg-[#333333] border border-primary-300 dark:border-primary-700 rounded px-2 py-1 text-sm" title="Change font color">
-                        <option value="default">Default</option>
-                        <option value="red">Red</option>
-                        <option value="blue">Blue</option>
-                        <option value="green">Green</option>
-                        <option value="yellow">Yellow</option>
-                        <option value="purple">Purple</option>
-                    </select>
-                    <select id="font-family" class="bg-white dark:bg-[#333333] border border-primary-300 dark:border-primary-700 rounded px-2 py-1 text-sm">
-                        <option value="sans">Sans-serif</option>
-                        <option value="serif">Serif</option>
-                        <option value="mono">Monospace</option>
-                        <option value="comic">Comic Sans</option>
-                        <option value="times">Times New Roman</option>
-                        <option value="verdana">Verdana</option>
-                        <option value="lex">Dyslexic Friendly</option>
-                    </select>
+                    <div class="flex space-x-4 mb-0">
+                        <!-- Font Color Dropdown -->
+                        <div class="relative">
+                          <button id="toggle-font-color" class="p-2 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition">
+                            <i class="fas fa-palette text-sm text-primary-600 dark:text-primary-300"></i>
+                          </button>
+                          <div id="dropdown-font-color" class="absolute left-0 mt-2 hidden z-10">
+                            <select id="font-color" class="bg-white dark:bg-[#333333] border border-primary-300 dark:border-primary-700 rounded px-2 py-1 text-sm" title="Change font color">
+                              <option value="default">Default</option>
+                              <option value="red">Red</option>
+                              <option value="blue">Blue</option>
+                              <option value="green">Green</option>
+                              <option value="yellow">Yellow</option>
+                              <option value="purple">Purple</option>
+                            </select>
+                          </div>
+                        </div>
+                      
+                        <!-- Font Family Dropdown -->
+                        <div class="relative">
+                          <button id="toggle-font-family" class="p-2 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition">
+                            <i class="fas fa-i-cursor text-sm text-primary-600 dark:text-primary-300"></i>
+                          </button>
+                          <div id="dropdown-font-family" class="absolute left-0 mt-2 hidden z-10">
+                            <select id="font-family" class="bg-white dark:bg-[#333333] border border-primary-300 dark:border-primary-700 rounded px-2 py-1 text-sm">
+                              <option value="sans">Sans-serif</option>
+                              <option value="serif">Serif</option>
+                              <option value="mono">Monospace</option>
+                              <option value="comic">Comic Sans</option>
+                              <option value="times">Times New Roman</option>
+                              <option value="verdana">Verdana</option>
+                              <option value="lex">Dyslexic Friendly</option>
+                            </select>
+                          </div>
+                        </div>
+                      
+                        <!-- Color Blind Options Dropdown -->
+                        <div class="relative">
+                          <button id="toggle-color-blind" class="p-2 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition">
+                            <i class="fas fa-droplet text-sm text-primary-600 dark:text-primary-300"></i>
+                          </button>
+                          <div id="dropdown-color-blind" class="absolute left-0 mt-2 hidden z-10">
+                            <select id="color-blind" class="bg-white dark:bg-[#333333] border border-primary-300 dark:border-primary-700 rounded px-2 py-1 text-sm" title="Accomodate color blindness">
+                              <option value="default">No Accommodation</option>
+                              <option value="deuteranomaly">Deuteranomaly</option>
+                              <option value="protanomaly">Protanomaly</option>
+                              <option value="deuteranopia">Deuteranopia</option>
+                              <option value="protanopia">Protanopia</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                      
                     <button id="read-aloud" class="p-2 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition" title="Read aloud">
                         <i class="fas fa-volume-up text-primary-600 dark:text-primary-300"></i>
                     </button>
@@ -218,7 +254,7 @@
             <!-- Mobile editing tools - only visible on reader page -->
             {% if request.endpoint == 'main.reader' %}
             <div class="md:hidden flex flex-wrap justify-center items-center gap-2 mt-2 pb-1 border-t border-primary-200 dark:border-primary-700 pt-2">
-                <button id="mobile-font-decrease" class="p-1 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition">
+                <button id="mobile-font-decrease" class="bg-primary-500 text-white px-4 py-2 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition">
                     <i class="fas fa-font text-sm text-primary-600 dark:text-primary-300"></i>
                 </button>
                 <button id="mobile-font-increase" class="p-1 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition">
@@ -232,6 +268,13 @@
                     <option value="times">Times New Roman</option>
                     <option value="verdana">Verdana</option>
                     <option value="lex">Dyslexic Friendly</option>
+                </select>
+                <select id="color-blind" class="bg-white dark:bg-[#333333] border border-primary-300 dark:border-primary-700 rounded px-1 py-1 text-xs" title="Accomodate color blindness">
+                    <option value="default">No Accomodation</option>
+                    <option value="deuteranomaly">Deuteranomaly</option>
+                    <option value="protanomaly">Protanomaly</option>
+                    <option value="deuteranopia">Deuteranopia</option>
+                    <option value="protanopia">Protanopia</option>
                 </select>
                 <button id="mobile-read-aloud" class="p-1 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition">
                     <i class="fas fa-volume-up text-primary-600 dark:text-primary-300"></i>
