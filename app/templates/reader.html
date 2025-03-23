@@ -319,6 +319,19 @@ document.addEventListener('DOMContentLoaded', function() {
             case 'mono':
                 readerContent.style.fontFamily = 'Courier New, ui-monospace, monospace';
                 break;
+            case 'comic':
+                readerContent.style.fontFamily = 'Comic Sans MS, Comic Sans, cursive';
+                break;
+            case 'times':
+                readerContent.style.fontFamily = 'Times New Roman, ui-serif, serif';
+                break;
+            case 'verdana':
+                readerContent.style.fontFamily = 'Verdana, ui-sans-serif, system-ui, sans-serif';
+                break;
+            case 'lex':
+                readerContent.style.fontFamily = 'OpenDyslexic, ui-sans-serif, system-ui, sans-serif';
+                break;
+            
         }
     });
     
@@ -527,6 +540,40 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
+  
+// Get the dropdown element for font color
+const fontColorDropdown = document.getElementById('font-color');
+
+fontColorDropdown.addEventListener('change', function() {
+    // Get the selected value
+    const selectedColor = this.value;
+    // Get the element containing the article text
+    const readerContent = document.getElementById('reader-content');
+    
+    // Change the text color based on selection
+    switch(selectedColor) {
+        case 'red':
+            readerContent.style.color = 'red';
+            break;
+        case 'blue':
+            readerContent.style.color = 'blue';
+            break;
+        case 'green':
+            readerContent.style.color = 'green';
+            break;
+        case 'yellow':
+            readerContent.style.color = 'yellow';
+            break;
+        case 'purple':
+            readerContent.style.color = 'purple';
+            break;
+        default:
+            // For default or any other unspecified value, remove inline color styling
+            readerContent.style.color = '';
+            break;
+    }
+});
+
 
     const highlightToggle = document.getElementById('highlight-toggle');
     const eraserToggle = document.getElementById('eraser-toggle');
@@ -608,6 +655,7 @@ document.addEventListener('DOMContentLoaded', function() {
             loadingScreen.style.display = 'none';
         });
     });
+
 });
 </script>
 {% endblock %}
