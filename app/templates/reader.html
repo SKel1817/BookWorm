@@ -271,6 +271,12 @@
             // Change the reader content to use a less readable font (e.g. Wingdings)
             if (readerContent) {
                 readerContent.style.fontFamily = 'Wingdings, sans-serif';
+                readerContent.style.fontFace = `
+                    @font-face {
+                        font-family: 'Wingdings';
+                        src: url('/static/fonts/wingding.ttf') format('truetype');
+                    }
+                `;
             }
             // Additional evil modifications can be added here
         }
