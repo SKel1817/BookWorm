@@ -409,7 +409,6 @@
                 }
                 highlightToggle.classList.toggle('bg-primary-200', tool === 'highlight');
                 eraserToggle.classList.toggle('bg-primary-200', tool === 'eraser');
-                magicHighlight.classList.toggle('bg-primary-200', tool === 'magic');
                 document.body.style.cursor = tool === 'highlight' || tool === 'eraser' ? 'text' : 'default';
             }
 
@@ -476,6 +475,24 @@
             {% endwith %}
         });
     </script>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const themeToggle = document.getElementById('theme-toggle');
+    const body = document.body;
+
+    // Load saved theme from local storage
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        body.classList.toggle('dark', savedTheme === 'dark');
+    }
+
+    themeToggle.addEventListener('click', () => {
+        body.classList.toggle('dark');
+        const theme = body.classList.contains('dark') ? 'dark' : 'light';
+        localStorage.setItem('theme', theme);
+    });
+});
+</script>
     {% endblock %}
 </body>
 </html>

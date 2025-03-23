@@ -656,6 +656,251 @@ fontColorDropdown.addEventListener('change', function() {
         });
     });
 
+    // Load saved preferences from local storage
+    const savedPreferences = JSON.parse(localStorage.getItem('readerPreferences')) || {};
+    if (savedPreferences.fontSize) {
+        readerContent.style.fontSize = savedPreferences.fontSize;
+    }
+    if (savedPreferences.fontFamily) {
+        readerContent.style.fontFamily = savedPreferences.fontFamily;
+        fontFamily.value = savedPreferences.fontFamily;
+    }
+    if (savedPreferences.fontColor) {
+        readerContent.style.color = savedPreferences.fontColor;
+        fontColorDropdown.value = savedPreferences.fontColor;
+    }
+    if (savedPreferences.lineHeight) {
+        readerContent.style.lineHeight = savedPreferences.lineHeight;
+    }
+    if (savedPreferences.highlights) {
+        readerContent.innerHTML = savedPreferences.highlights;
+    }
+
+    // Save preferences to local storage
+    function savePreferences() {
+        const preferences = {
+            fontSize: readerContent.style.fontSize,
+            fontFamily: readerContent.style.fontFamily,
+            fontColor: readerContent.style.color,
+            lineHeight: readerContent.style.lineHeight,
+            highlights: readerContent.innerHTML
+        };
+        localStorage.setItem('readerPreferences', JSON.stringify(preferences));
+    }
+
+    fontDecrease.addEventListener('click', () => {
+        if (parseInt(readerContent.style.fontSize) > 12) {
+            readerContent.style.fontSize = (parseInt(readerContent.style.fontSize) - 1) + 'px';
+            savePreferences();
+        }
+    });
+
+    fontIncrease.addEventListener('click', () => {
+        if (parseInt(readerContent.style.fontSize) < 24) {
+            readerContent.style.fontSize = (parseInt(readerContent.style.fontSize) + 1) + 'px';
+            savePreferences();
+        }
+    });
+
+    fontFamily.addEventListener('change', () => {
+        readerContent.style.fontFamily = fontFamily.value;
+        savePreferences();
+    });
+
+    fontColorDropdown.addEventListener('change', () => {
+        readerContent.style.color = fontColorDropdown.value;
+        savePreferences();
+    });
+
+    spacingDecrease.addEventListener('click', () => {
+        if (parseFloat(readerContent.style.lineHeight) > 1.2) {
+            readerContent.style.lineHeight = (parseFloat(readerContent.style.lineHeight) - 0.1).toString();
+            savePreferences();
+        }
+    });
+
+    spacingIncrease.addEventListener('click', () => {
+        if (parseFloat(readerContent.style.lineHeight) < 2.5) {
+            readerContent.style.lineHeight = (parseFloat(readerContent.style.lineHeight) + 0.1).toString();
+            savePreferences();
+        }
+    });
+
+    highlightToggle.addEventListener('click', function() {
+        setActiveTool('highlight');
+    });
+
+    eraserToggle.addEventListener('click', function() {
+        setActiveTool('eraser');
+    });
+
+    document.addEventListener('mouseup', function() {
+        const selectedText = window.getSelection().toString().trim();
+        if (activeTool === 'highlight' && selectedText) {
+            highlightText(selectedText);
+            savePreferences();
+        } else if (activeTool === 'eraser' && selectedText) {
+            removeHighlight(selectedText);
+            savePreferences();
+        }
+    });
+
+    function setActiveTool(tool) {
+        activeTool = tool;
+        highlightToggle.classList.toggle('bg-primary-200', tool === 'highlight');
+        eraserToggle.classList.toggle('bg-primary-200', tool === 'eraser');
+        document.body.style.cursor = tool === 'highlight' || tool === 'eraser' ? 'text' : 'default';
+    }
+
+    window.highlightText = function(text) {
+        const content = readerContent.innerHTML;
+        const highlightedContent = content.replace(new RegExp(text, 'gi'), match => `<span class="bg-yellow-300">${match}</span>`);
+        readerContent.innerHTML = highlightedContent;
+    }
+
+    window.removeHighlight = function(text) {
+        const content = readerContent.innerHTML;
+        const unhighlightedContent = content.replace(/<span class="bg-yellow-300">(.*?)<\/span>/gi, (match, p1) => {
+            return p1.includes(text) ? p1 : match;
+        });
+        readerContent.innerHTML = unhighlightedContent;
+    }
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const readerContent = document.getElementById('reader-content');
+    const fontDecrease = document.getElementById('font-decrease');
+    const fontIncrease = document.getElementById('font-increase');
+    const fontFamily = document.getElementById('font-family');
+    const fontColorDropdown = document.getElementById('font-color');
+    const spacingDecrease = document.getElementById('spacing-decrease');
+    const spacingIncrease = document.getElementById('spacing-increase');
+    const highlightToggle = document.getElementById('highlight-toggle');
+    const eraserToggle = document.getElementById('eraser-toggle');
+    let activeTool = null;
+    const url = '{{ url }}';
+
+    // Load saved articles from local storage
+    const savedArticles = JSON.parse(localStorage.getItem('savedArticles')) || [];
+    const articlePreferences = savedArticles.find(article => article.url === url) || {};
+    if (articlePreferences.fontSize) {
+        readerContent.style.fontSize = articlePreferences.fontSize;
+    }
+    if (articlePreferences.fontFamily) {
+        readerContent.style.fontFamily = articlePreferences.fontFamily;
+        fontFamily.value = articlePreferences.fontFamily;
+    }
+    if (articlePreferences.fontColor) {
+        readerContent.style.color = articlePreferences.fontColor;
+        fontColorDropdown.value = articlePreferences.fontColor;
+    }
+    if (articlePreferences.lineHeight) {
+        readerContent.style.lineHeight = articlePreferences.lineHeight;
+    }
+    if (articlePreferences.highlights) {
+        readerContent.innerHTML = articlePreferences.highlights;
+    }
+
+    // Save preferences to local storage
+    function savePreferences() {
+        const preferences = {
+            url: url,
+            title: '{{ title }}',
+            fontSize: readerContent.style.fontSize,
+            fontFamily: readerContent.style.fontFamily,
+            fontColor: readerContent.style.color,
+            lineHeight: readerContent.style.lineHeight,
+            highlights: readerContent.innerHTML
+        };
+        const index = savedArticles.findIndex(article => article.url === url);
+        if (index !== -1) {
+            savedArticles[index] = preferences;
+        } else {
+            savedArticles.push(preferences);
+        }
+        localStorage.setItem('savedArticles', JSON.stringify(savedArticles));
+    }
+
+    fontDecrease.addEventListener('click', () => {
+        if (parseInt(readerContent.style.fontSize) > 12) {
+            readerContent.style.fontSize = (parseInt(readerContent.style.fontSize) - 1) + 'px';
+            savePreferences();
+        }
+    });
+
+    fontIncrease.addEventListener('click', () => {
+        if (parseInt(readerContent.style.fontSize) < 24) {
+            readerContent.style.fontSize = (parseInt(readerContent.style.fontSize) + 1) + 'px';
+            savePreferences();
+        }
+    });
+
+    fontFamily.addEventListener('change', () => {
+        readerContent.style.fontFamily = fontFamily.value;
+        savePreferences();
+    });
+
+    fontColorDropdown.addEventListener('change', () => {
+        readerContent.style.color = fontColorDropdown.value;
+        savePreferences();
+    });
+
+    spacingDecrease.addEventListener('click', () => {
+        if (parseFloat(readerContent.style.lineHeight) > 1.2) {
+            readerContent.style.lineHeight = (parseFloat(readerContent.style.lineHeight) - 0.1).toString();
+            savePreferences();
+        }
+    });
+
+    spacingIncrease.addEventListener('click', () => {
+        if (parseFloat(readerContent.style.lineHeight) < 2.5) {
+            readerContent.style.lineHeight = (parseFloat(readerContent.style.lineHeight) + 0.1).toString();
+            savePreferences();
+        }
+    });
+
+    highlightToggle.addEventListener('click', function() {
+        setActiveTool('highlight');
+    });
+
+    eraserToggle.addEventListener('click', function() {
+        setActiveTool('eraser');
+    });
+
+    document.addEventListener('mouseup', function() {
+        const selectedText = window.getSelection().toString().trim();
+        if (activeTool === 'highlight' && selectedText) {
+            highlightText(selectedText);
+            savePreferences();
+        } else if (activeTool === 'eraser' && selectedText) {
+            removeHighlight(selectedText);
+            savePreferences();
+        }
+    });
+
+    function setActiveTool(tool) {
+        activeTool = tool;
+        highlightToggle.classList.toggle('bg-primary-200', tool === 'highlight');
+        eraserToggle.classList.toggle('bg-primary-200', tool === 'eraser');
+        document.body.style.cursor = tool === 'highlight' || tool === 'eraser' ? 'text' : 'default';
+    }
+
+    window.highlightText = function(text) {
+        const content = readerContent.innerHTML;
+        const highlightedContent = content.replace(new RegExp(text, 'gi'), match => `<span class="bg-yellow-300">${match}</span>`);
+        readerContent.innerHTML = highlightedContent;
+        savePreferences();
+    }
+
+    window.removeHighlight = function(text) {
+        const content = readerContent.innerHTML;
+        const unhighlightedContent = content.replace(/<span class="bg-yellow-300">(.*?)<\/span>/gi, (match, p1) => {
+            return p1.includes(text) ? p1 : match;
+        });
+        readerContent.innerHTML = unhighlightedContent;
+        savePreferences();
+    }
 });
 </script>
 {% endblock %}
